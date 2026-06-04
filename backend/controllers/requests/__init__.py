@@ -1,0 +1,81 @@
+from backend.controllers.requests.requests import (
+    # existing
+    ChallengeCreateRequest,
+    GoalCreateRequest,
+    GroupCreateRequest,
+    GroupJoinRequest,
+    HabitCompletionRequest,
+    HabitCreateRequest,
+    UserCredentialsRequest,
+    UserLogoutRequest,
+    UserProfileUpdateRequest,
+    UserQuizResultRequest,
+    # identity
+    IdentityRecalculateRequest,
+    # daily protocol
+    DailyProtocolCreateRequest,
+    DailyProtocolCompleteRequest,
+    # deload
+    DeloadCompleteRequest,
+    # program
+    ProgramStartRequest,
+    ProgramCompleteDayRequest,
+    # weekly review
+    WeeklyReviewSubmitRequest,
+    # rewards
+    RewardCheckRequest,
+    RewardActivateRequest,
+    # challenge extensions
+    ChallengeUpdateRequest,
+    ChallengeRegisterRequest,
+    ChallengeSubmitProofRequest,
+    ChallengeModerateRequest,
+    # chat
+    ChatStartDMRequest,
+    ChatSendMessageRequest,
+    # productivity
+    WaterLogRequest,
+    WaterGoalRequest,
+    PlannerTaskCreateRequest,
+    PlannerTaskUpdateRequest,
+    SRCardCreateRequest,
+    SRCardReviewRequest,
+    BrainstormCreateRequest,
+    BrainstormIdeaRequest,
+)
+
+__all__ = [
+    "ChallengeCreateRequest",
+    "GoalCreateRequest",
+    "GroupCreateRequest",
+    "GroupJoinRequest",
+    "HabitCompletionRequest",
+    "HabitCreateRequest",
+    "UserCredentialsRequest",
+    "UserLogoutRequest",
+    "UserProfileUpdateRequest",
+    "UserQuizResultRequest",
+    "IdentityRecalculateRequest",
+    "DailyProtocolCreateRequest",
+    "DailyProtocolCompleteRequest",
+    "DeloadCompleteRequest",
+    "ProgramStartRequest",
+    "ProgramCompleteDayRequest",
+    "WeeklyReviewSubmitRequest",
+    "RewardCheckRequest",
+    "RewardActivateRequest",
+    "ChallengeUpdateRequest",
+    "ChallengeRegisterRequest",
+    "ChallengeSubmitProofRequest",
+    "ChallengeModerateRequest",
+    "ChatStartDMRequest",
+    "ChatSendMessageRequest",
+    "WaterLogRequest",
+    "WaterGoalRequest",
+    "PlannerTaskCreateRequest",
+    "PlannerTaskUpdateRequest",
+    "SRCardCreateRequest",
+    "SRCardReviewRequest",
+    "BrainstormCreateRequest",
+    "BrainstormIdeaRequest",
+]

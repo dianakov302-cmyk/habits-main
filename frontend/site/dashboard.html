@@ -1,0 +1,823 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Dashboard — Anaida Space</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700;800&family=Space+Mono:wght@400;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="css/style.css">
+  <style>
+    /* ── Dashboard-specific design tokens ── */
+    :root {
+      --violet: #8b5cf6; --violet2: #7c3aed;
+      --emerald: #10b981; --white: #f8fafc;
+      --muted: #94a3b8; --danger: #ef4444;
+      --glass: rgba(30,41,59,.65); --gb: rgba(255,255,255,.10);
+      --shadow: 0 8px 32px rgba(0,0,0,.4);
+      --radius-card: 20px; --radius-btn: 12px;
+    }
+
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    html, body { height: 100%; font-family: 'Outfit', sans-serif; }
+
+    body {
+      background: #080814;
+      color: var(--white);
+      background-image:
+        radial-gradient(circle at 15% 50%, rgba(139,92,246,.12), transparent 30%),
+        radial-gradient(circle at 85% 20%, rgba(16,185,129,.10), transparent 30%);
+      background-attachment: fixed;
+      min-height: 100vh;
+    }
+
+    /* ── Top nav ── */
+    .dash-nav {
+      position: fixed; top: 0; left: 0; right: 0; z-index: 100;
+      display: flex; align-items: center; gap: 8px;
+      padding: 10px 24px;
+      background: rgba(8,8,20,.7);
+      backdrop-filter: blur(16px);
+      border-bottom: 1px solid rgba(255,255,255,.06);
+    }
+    .dash-logo {
+      font-family: 'Outfit', sans-serif; font-size: .9rem;
+      font-weight: 700; letter-spacing: .04em;
+      background: linear-gradient(135deg,#c4b5fd,#8b5cf6);
+      -webkit-background-clip: text; -webkit-text-fill-color: transparent;
+      margin-right: 8px; white-space: nowrap;
+    }
+    .dash-tabs { display: flex; gap: 4px; flex-wrap: wrap; }
+    .dash-tab {
+      background: rgba(255,255,255,.08); border: none; border-radius: 999px;
+      padding: 5px 14px; font-size: .75rem; font-family: 'Outfit', sans-serif;
+      color: var(--white); cursor: pointer; transition: all .25s;
+    }
+    .dash-tab:hover, .dash-tab.active {
+      background: var(--violet); color: var(--white);
+    }
+    .dash-user {
+      margin-left: auto; font-size: .78rem; color: var(--muted);
+      display: flex; align-items: center; gap: 8px;
+    }
+    .dash-avatar {
+      width: 30px; height: 30px; border-radius: 50%;
+      background: var(--violet); display: flex; align-items: center;
+      justify-content: center; font-size: .85rem; font-weight: 700;
+      cursor: pointer; flex-shrink: 0;
+    }
+
+    /* ── Main layout ── */
+    .dash-body { padding: 72px 24px 48px; max-width: 1100px; margin: 0 auto; }
+    .dash-panel { display: none; animation: fadeIn .35s ease; }
+    .dash-panel.active { display: block; }
+    @keyframes fadeIn { from { opacity:0; transform:translateY(12px); } to { opacity:1; transform:translateY(0); } }
+
+    /* ── Cards ── */
+    .card {
+      background: rgba(30,41,59,.65);
+      backdrop-filter: blur(16px);
+      border: 1px solid rgba(255,255,255,.08);
+      border-radius: var(--radius-card);
+      padding: 28px;
+      box-shadow: var(--shadow);
+    }
+    .card + .card { margin-top: 20px; }
+    .card-title {
+      font-size: 1rem; font-weight: 600; color: var(--white);
+      margin-bottom: 18px; display: flex; align-items: center; gap: 10px;
+    }
+    .card-title::before {
+      content: ''; display: inline-block; width: 8px; height: 8px;
+      border-radius: 50%; background: var(--violet);
+      box-shadow: 0 0 8px var(--violet); flex-shrink: 0;
+    }
+    .grid-2 { display: grid; grid-template-columns: 1fr 1fr; gap: 20px; }
+    .grid-3 { display: grid; grid-template-columns: repeat(3,1fr); gap: 16px; }
+    @media(max-width:700px){ .grid-2,.grid-3 { grid-template-columns:1fr; } }
+
+    /* ── Identity level ── */
+    .identity-bar-wrap { margin: 8px 0 4px; }
+    .identity-bar-track {
+      background: rgba(255,255,255,.08); border-radius: 999px;
+      height: 8px; overflow: hidden;
+    }
+    .identity-bar-fill {
+      height: 100%; border-radius: 999px;
+      background: linear-gradient(90deg, var(--violet), #a78bfa);
+      transition: width .8s ease;
+    }
+    .identity-label { font-size: 1.8rem; font-weight: 700; margin: 4px 0 2px; }
+    .identity-sub { font-size: .85rem; color: var(--muted); margin-bottom: 14px; }
+    .identity-next { font-size: .78rem; color: var(--muted); margin-top: 6px; }
+
+    /* ── Protocol tasks ── */
+    .task-row {
+      display: flex; align-items: center; gap: 14px;
+      padding: 14px 16px; border-radius: 14px;
+      background: rgba(255,255,255,.04);
+      border: 1px solid rgba(255,255,255,.07);
+      margin-bottom: 10px; transition: all .2s;
+    }
+    .task-row.completed { border-color: rgba(16,185,129,.3); background: rgba(16,185,129,.06); }
+    .task-row.completed .task-name { text-decoration: line-through; color: var(--muted); }
+    .task-badge {
+      font-size: .65rem; font-weight: 700; padding: 3px 10px;
+      border-radius: 999px; flex-shrink: 0; letter-spacing: .05em;
+    }
+    .badge-min  { background: rgba(139,92,246,.2); color: #c4b5fd; }
+    .badge-tgt  { background: rgba(16,185,129,.2); color: #6ee7b7; }
+    .badge-bon  { background: rgba(245,158,11,.2); color: #fcd34d; }
+    .task-name  { flex: 1; font-size: .92rem; }
+    .task-pts   { font-size: .75rem; color: var(--muted); }
+    .check-btn  {
+      background: none; border: 1px solid rgba(255,255,255,.15);
+      color: var(--white); border-radius: 8px; padding: 5px 14px;
+      font-size: .75rem; cursor: pointer; transition: all .2s;
+      font-family: 'Outfit', sans-serif;
+    }
+    .check-btn:hover { background: var(--violet); border-color: var(--violet); }
+    .check-btn:disabled { opacity: .4; cursor: default; }
+
+    /* ── Buttons ── */
+    .btn {
+      background: linear-gradient(135deg, var(--violet), var(--violet2));
+      color: white; border: none; padding: 11px 22px;
+      border-radius: var(--radius-btn); font-size: .9rem;
+      font-weight: 600; cursor: pointer;
+      box-shadow: 0 4px 14px rgba(139,92,246,.3);
+      transition: all .25s; font-family: 'Outfit', sans-serif;
+    }
+    .btn:hover { transform: translateY(-2px); box-shadow: 0 6px 20px rgba(139,92,246,.4); }
+    .btn:disabled { opacity: .45; cursor: default; transform: none; }
+    .btn-secondary {
+      background: transparent;
+      border: 1px solid rgba(255,255,255,.12);
+      box-shadow: none; color: var(--white);
+    }
+    .btn-secondary:hover { background: rgba(255,255,255,.06); }
+    .btn-sm { padding: 7px 16px; font-size: .8rem; }
+    .btn-danger { background: var(--danger); box-shadow: 0 4px 14px rgba(239,68,68,.2); }
+
+    /* ── Inputs & textareas ── */
+    .field {
+      background: rgba(15,23,42,.6);
+      border: 1px solid rgba(255,255,255,.1);
+      color: var(--white); padding: 11px 14px;
+      border-radius: var(--radius-btn);
+      font-family: 'Outfit', sans-serif; font-size: .9rem;
+      outline: none; width: 100%; transition: all .2s;
+    }
+    .field:focus { border-color: var(--violet); box-shadow: 0 0 0 3px rgba(139,92,246,.2); }
+    textarea.field { resize: vertical; min-height: 80px; }
+    .field-row { display: flex; gap: 10px; align-items: flex-start; flex-wrap: wrap; }
+    .field-label { font-size: .78rem; color: var(--muted); margin-bottom: 6px; display: block; }
+
+    /* ── Phase chip ── */
+    .phase-chip {
+      display: inline-block; padding: 4px 14px; border-radius: 999px;
+      font-size: .72rem; font-weight: 600; letter-spacing: .06em;
+    }
+    .phase-START        { background: rgba(139,92,246,.2); color: #c4b5fd; }
+    .phase-RHYTHM       { background: rgba(16,185,129,.2); color: #6ee7b7; }
+    .phase-REINFORCEMENT{ background: rgba(245,158,11,.2); color: #fcd34d; }
+
+    /* ── Progress bar ── */
+    .prog-wrap { margin: 10px 0; }
+    .prog-track { background: rgba(255,255,255,.08); border-radius: 999px; height: 6px; overflow: hidden; }
+    .prog-fill  { height: 100%; border-radius: 999px; background: linear-gradient(90deg,var(--emerald),#34d399); transition: width .6s ease; }
+
+    /* ── Day grid ── */
+    .day-grid { display: flex; flex-wrap: wrap; gap: 6px; margin-top: 14px; }
+    .day-dot  {
+      width: 28px; height: 28px; border-radius: 8px;
+      background: rgba(255,255,255,.07); display: flex;
+      align-items: center; justify-content: center;
+      font-size: .65rem; color: var(--muted); position: relative;
+    }
+    .day-dot.done    { background: rgba(16,185,129,.25); color: #6ee7b7; }
+    .day-dot.current { background: rgba(139,92,246,.35); color: #c4b5fd; border: 1px solid var(--violet); }
+
+    /* ── Review form ── */
+    .review-q { margin-bottom: 16px; }
+
+    /* ── Water tracker ── */
+    .water-glasses { display: flex; gap: 8px; flex-wrap: wrap; margin: 14px 0; }
+    .glass {
+      width: 36px; height: 36px; border-radius: 10px;
+      background: rgba(255,255,255,.07); display: flex;
+      align-items: center; justify-content: center;
+      font-size: 1.1rem; transition: all .2s;
+    }
+    .glass.filled { background: rgba(59,130,246,.3); }
+    .water-count { font-size: 1.4rem; font-weight: 700; }
+    .water-goal  { font-size: .82rem; color: var(--muted); }
+
+    /* ── Planner ── */
+    .planner-task {
+      display: flex; align-items: center; gap: 12px;
+      padding: 12px 14px; border-radius: 12px;
+      background: rgba(255,255,255,.04);
+      border: 1px solid rgba(255,255,255,.07);
+      margin-bottom: 8px;
+    }
+    .planner-task.done .task-name { text-decoration: line-through; color: var(--muted); }
+    .priority-dot {
+      width: 8px; height: 8px; border-radius: 50%; flex-shrink: 0;
+    }
+    .p-high { background: var(--danger); }
+    .p-medium { background: #f59e0b; }
+    .p-low  { background: var(--emerald); }
+
+    /* ── SR cards ── */
+    .sr-card-face {
+      background: rgba(255,255,255,.04);
+      border: 1px solid rgba(255,255,255,.08);
+      border-radius: 16px; padding: 28px;
+      text-align: center; min-height: 120px;
+      display: flex; align-items: center; justify-content: center;
+      font-size: 1.15rem; font-weight: 500;
+      cursor: pointer; transition: all .3s;
+    }
+    .sr-card-face:hover { border-color: rgba(139,92,246,.4); }
+    .sr-ease-btns { display: flex; gap: 8px; margin-top: 14px; justify-content: center; flex-wrap: wrap; }
+    .ease-btn {
+      flex: 1; max-width: 90px; padding: 8px 4px; border: none; border-radius: 10px;
+      font-size: .78rem; font-weight: 600; cursor: pointer;
+      font-family: 'Outfit', sans-serif; transition: all .2s;
+    }
+    .ease-1 { background: rgba(239,68,68,.25); color: #fca5a5; }
+    .ease-2 { background: rgba(245,158,11,.2); color: #fcd34d; }
+    .ease-3 { background: rgba(16,185,129,.2); color: #6ee7b7; }
+    .ease-4 { background: rgba(139,92,246,.2); color: #c4b5fd; }
+    .ease-btn:hover { filter: brightness(1.3); }
+
+    /* ── Brainstorm ── */
+    .brainstorm-idea {
+      padding: 10px 14px; border-radius: 10px;
+      background: rgba(255,255,255,.05);
+      border-left: 3px solid var(--violet);
+      margin-bottom: 8px; font-size: .88rem;
+    }
+    .brainstorm-time { font-size: .7rem; color: var(--muted); margin-top: 4px; }
+
+    /* ── Rewards ── */
+    .reward-card {
+      padding: 18px; border-radius: 14px;
+      background: rgba(255,255,255,.04);
+      border: 1px solid rgba(255,255,255,.07);
+      transition: all .25s;
+    }
+    .reward-card.unlocked {
+      border-color: rgba(139,92,246,.35);
+      background: rgba(139,92,246,.08);
+    }
+    .reward-icon { font-size: 1.6rem; margin-bottom: 8px; }
+    .reward-name { font-size: .9rem; font-weight: 600; margin-bottom: 4px; }
+    .reward-desc { font-size: .75rem; color: var(--muted); }
+    .reward-locked { font-size: .7rem; color: var(--muted); margin-top: 8px; }
+    .reward-activate-btn {
+      margin-top: 10px; padding: 5px 14px; border-radius: 8px;
+      background: var(--violet); border: none; color: white;
+      font-size: .75rem; cursor: pointer; font-family: 'Outfit', sans-serif;
+      font-weight: 600;
+    }
+
+    /* ── Chat ── */
+    .chat-conv-list { display: flex; flex-direction: column; gap: 8px; }
+    .conv-item {
+      display: flex; align-items: center; gap: 14px;
+      padding: 12px 16px; border-radius: 14px;
+      background: rgba(255,255,255,.04);
+      border: 1px solid rgba(255,255,255,.07);
+      cursor: pointer; transition: all .2s;
+    }
+    .conv-item:hover { background: rgba(255,255,255,.08); }
+    .conv-avatar {
+      width: 38px; height: 38px; border-radius: 50%;
+      background: var(--violet); display: flex; align-items: center;
+      justify-content: center; font-weight: 700; font-size: .9rem; flex-shrink: 0;
+    }
+    .conv-info { flex: 1; overflow: hidden; }
+    .conv-name { font-size: .9rem; font-weight: 600; }
+    .conv-last { font-size: .78rem; color: var(--muted); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+    .msg-list { max-height: 340px; overflow-y: auto; display: flex; flex-direction: column; gap: 10px; padding: 4px 0 14px; }
+    .msg { max-width: 72%; }
+    .msg.mine { align-self: flex-end; }
+    .msg-bubble {
+      padding: 10px 14px; border-radius: 16px;
+      font-size: .88rem; line-height: 1.45;
+    }
+    .msg.mine .msg-bubble { background: var(--violet); border-bottom-right-radius: 4px; }
+    .msg.theirs .msg-bubble { background: rgba(255,255,255,.08); border-bottom-left-radius: 4px; }
+    .msg-time { font-size: .65rem; color: var(--muted); margin-top: 3px; text-align: right; }
+
+    /* ── Status / feedback ── */
+    .status-msg { font-size: .82rem; margin-top: 8px; min-height: 18px; }
+    .status-msg.ok  { color: var(--emerald); }
+    .status-msg.err { color: var(--danger); }
+
+    /* ── Section header ── */
+    .section-header { margin-bottom: 24px; }
+    .section-header h1 { font-size: 1.5rem; font-weight: 700; }
+    .section-header p  { font-size: .88rem; color: var(--muted); margin-top: 4px; }
+
+    /* ── Auth gate ── */
+    .auth-gate {
+      text-align: center; padding: 60px 20px;
+    }
+    .auth-gate h2 { font-size: 1.4rem; margin-bottom: 10px; }
+    .auth-gate p  { color: var(--muted); margin-bottom: 24px; }
+
+    /* ── Deload activity grid ── */
+    .activity-grid { display: grid; grid-template-columns: repeat(auto-fill,minmax(130px,1fr)); gap: 10px; margin-top: 14px; }
+    .activity-btn {
+      padding: 16px 10px; border-radius: 14px; border: 1px solid rgba(255,255,255,.1);
+      background: rgba(255,255,255,.04); cursor: pointer; text-align: center;
+      transition: all .25s; font-family: 'Outfit', sans-serif; color: var(--white);
+    }
+    .activity-btn:hover, .activity-btn.selected {
+      border-color: var(--violet); background: rgba(139,92,246,.12);
+    }
+    .activity-icon { font-size: 1.6rem; margin-bottom: 6px; }
+    .activity-label { font-size: .8rem; font-weight: 500; }
+
+    /* ── Overview stat chips ── */
+    .stat-row { display: flex; gap: 12px; flex-wrap: wrap; margin: 16px 0; }
+    .stat-chip {
+      background: rgba(255,255,255,.06);
+      border: 1px solid rgba(255,255,255,.1);
+      border-radius: 12px; padding: 12px 18px;
+      flex: 1; min-width: 100px;
+    }
+    .stat-chip-val { font-size: 1.4rem; font-weight: 700; }
+    .stat-chip-lbl { font-size: .72rem; color: var(--muted); margin-top: 2px; }
+
+    /* ── Empty state ── */
+    .empty { text-align: center; padding: 32px; color: var(--muted); font-size: .88rem; }
+
+    /* ── Scrollbar ── */
+    ::-webkit-scrollbar { width: 5px; }
+    ::-webkit-scrollbar-track { background: transparent; }
+    ::-webkit-scrollbar-thumb { background: rgba(255,255,255,.1); border-radius: 999px; }
+  </style>
+</head>
+<body>
+
+<!-- ═══ TOP NAV ═══ -->
+<nav class="dash-nav" id="dashNav">
+  <span class="dash-logo">Anaida Space</span>
+  <div class="dash-tabs" id="dashTabs">
+    <button class="dash-tab active" data-panel="overview">Overview</button>
+    <button class="dash-tab" data-panel="protocol">Protocol</button>
+    <button class="dash-tab" data-panel="program">Program</button>
+    <button class="dash-tab" data-panel="review">Review</button>
+    <button class="dash-tab" data-panel="productivity">Productivity</button>
+    <button class="dash-tab" data-panel="study">Study</button>
+    <button class="dash-tab" data-panel="rewards">Rewards</button>
+    <button class="dash-tab" data-panel="chat">Chat</button>
+  </div>
+  <div class="dash-user">
+    <span id="dashEmail"></span>
+    <div class="dash-avatar" id="dashAvatar" title="Account"></div>
+  </div>
+</nav>
+
+<!-- ═══ MAIN BODY ═══ -->
+<main class="dash-body">
+
+  <!-- ══ OVERVIEW ══ -->
+  <div class="dash-panel active" id="panel-overview">
+    <div id="overviewAuth" class="auth-gate" style="display:none">
+      <h2>Sign in to access your dashboard</h2>
+      <p>Track your identity, protocol, and progress.</p>
+      <a href="registration.html" class="btn" style="text-decoration:none;display:inline-block">Sign In / Register</a>
+    </div>
+    <div id="overviewContent">
+      <div class="section-header">
+        <h1 id="greetingText">Good morning.</h1>
+        <p id="greetingSub">Here's where you stand today.</p>
+      </div>
+
+      <!-- Identity card -->
+      <div class="card" id="identityCard">
+        <div class="card-title">Identity</div>
+        <div class="identity-label" id="identityLevel">—</div>
+        <div class="identity-sub" id="identityMsg">Loading your identity profile…</div>
+        <div class="identity-bar-wrap">
+          <div class="identity-bar-track">
+            <div class="identity-bar-fill" id="identityBar" style="width:0%"></div>
+          </div>
+        </div>
+        <div class="identity-next" id="identityNext"></div>
+      </div>
+
+      <!-- Stats row -->
+      <div class="stat-row" id="statsRow">
+        <div class="stat-chip">
+          <div class="stat-chip-val" id="statPoints">—</div>
+          <div class="stat-chip-lbl">Points today</div>
+        </div>
+        <div class="stat-chip">
+          <div class="stat-chip-val" id="statStreak">—</div>
+          <div class="stat-chip-lbl">Day streak</div>
+        </div>
+        <div class="stat-chip">
+          <div class="stat-chip-val" id="statWater">—</div>
+          <div class="stat-chip-lbl">Glasses today</div>
+        </div>
+        <div class="stat-chip">
+          <div class="stat-chip-val" id="statCards">—</div>
+          <div class="stat-chip-lbl">Cards due</div>
+        </div>
+      </div>
+
+      <!-- Deload alert -->
+      <div class="card" id="deloadAlert" style="display:none; border-color:rgba(245,158,11,.3); background:rgba(245,158,11,.06);">
+        <div class="card-title" style="color:#fcd34d;">Recovery Day</div>
+        <p style="font-size:.88rem;color:var(--muted);margin-bottom:14px;">
+          You've hit a 7-day streak. Take one recovery activity to keep your streak alive and prevent burnout.
+        </p>
+        <button class="btn btn-sm" onclick="switchPanel('protocol')">Choose Activity →</button>
+      </div>
+
+      <!-- Today's protocol summary -->
+      <div class="card" id="protocolSummary">
+        <div class="card-title">Today's Protocol</div>
+        <div id="protocolSummaryContent"><div class="empty">No protocol set for today. Go to Protocol tab to create one.</div></div>
+        <button class="btn btn-secondary btn-sm" style="margin-top:14px" onclick="switchPanel('protocol')">Open Protocol →</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- ══ DAILY PROTOCOL ══ -->
+  <div class="dash-panel" id="panel-protocol">
+    <div class="section-header">
+      <h1>Daily Protocol</h1>
+      <p>Minimum keeps your streak. Target is a good day. Bonus is above and beyond.</p>
+    </div>
+
+    <!-- Create form (shown when no protocol exists) -->
+    <div class="card" id="protocolCreateForm">
+      <div class="card-title">Create Today's Protocol</div>
+      <div class="review-q">
+        <label class="field-label">Minimum task (mandatory, 1 pt)</label>
+        <input class="field" id="pMinInput" placeholder="e.g. Meditate 5 minutes" />
+      </div>
+      <div class="review-q">
+        <label class="field-label">Target task (standard day, 2 pts)</label>
+        <input class="field" id="pTargetInput" placeholder="e.g. Complete one Pomodoro session" />
+      </div>
+      <div class="review-q">
+        <label class="field-label">Bonus task (extra challenge, 3 pts)</label>
+        <input class="field" id="pBonusInput" placeholder="e.g. Cold shower after workout" />
+      </div>
+      <button class="btn" id="protocolCreateBtn">Create Protocol</button>
+      <div class="status-msg" id="protocolCreateStatus"></div>
+    </div>
+
+    <!-- Active protocol (shown when protocol exists) -->
+    <div class="card" id="protocolActive" style="display:none">
+      <div class="card-title">
+        Today's Tasks
+        <span id="protocolPoints" style="margin-left:auto;font-size:.9rem;color:var(--violet);font-weight:700"></span>
+      </div>
+      <div id="protocolTaskList"></div>
+      <div class="status-msg" id="protocolStatus"></div>
+    </div>
+
+    <!-- Deload panel -->
+    <div class="card" id="deloadPanel" style="display:none; border-color:rgba(245,158,11,.25);">
+      <div class="card-title" style="color:#fcd34d;">Recovery Day Active</div>
+      <p style="font-size:.88rem;color:var(--muted);margin-bottom:4px;">
+        Choose one activity. Completing it gives +1 point and keeps your streak alive.
+      </p>
+      <div class="activity-grid" id="activityGrid"></div>
+      <button class="btn" id="deloadCompleteBtn" style="margin-top:16px;" disabled>Complete Recovery Day</button>
+      <div class="status-msg" id="deloadStatus"></div>
+    </div>
+  </div>
+
+  <!-- ══ 30-DAY PROGRAM ══ -->
+  <div class="dash-panel" id="panel-program">
+    <div class="section-header">
+      <h1>30-Day Program</h1>
+      <p>Structured progress across three phases. Show up every day.</p>
+    </div>
+
+    <!-- No active program -->
+    <div id="programStart">
+      <div class="card">
+        <div class="card-title">Start a Program</div>
+        <div class="review-q">
+          <label class="field-label">Goal</label>
+          <select class="field" id="programGoalSelect">
+            <option value="">Select a goal…</option>
+            <option value="focus_productivity">Focus &amp; Productivity</option>
+            <option value="build_discipline">Build Discipline</option>
+            <option value="physical_health">Physical Health</option>
+            <option value="mental_balance">Mental Balance</option>
+            <option value="personal_growth">Personal Growth</option>
+            <option value="social_motivation">Social Motivation</option>
+            <option value="life_reset">Life Reset</option>
+            <option value="studying">Studying</option>
+            <option value="find_people">Find Your People</option>
+            <option value="find_direction">Find Identity / Direction</option>
+          </select>
+        </div>
+        <div class="review-q">
+          <label class="field-label">Level</label>
+          <select class="field" id="programLevelSelect">
+            <option value="beginner">Beginner</option>
+            <option value="medium">Medium</option>
+            <option value="advanced">Advanced</option>
+          </select>
+        </div>
+        <button class="btn" id="programStartBtn">Begin 30-Day Journey</button>
+        <div class="status-msg" id="programStartStatus"></div>
+      </div>
+
+      <div class="card" style="margin-top:20px">
+        <div class="card-title">Program Phases</div>
+        <div id="programPhasesContent"><div class="empty">Loading…</div></div>
+      </div>
+    </div>
+
+    <!-- Active program -->
+    <div id="programActive" style="display:none">
+      <div class="card">
+        <div class="card-title">
+          Active Program
+          <span class="phase-chip" id="programPhaseChip" style="margin-left:auto"></span>
+        </div>
+        <div style="display:flex;gap:24px;flex-wrap:wrap;margin-bottom:16px;">
+          <div>
+            <div style="font-size:2rem;font-weight:800" id="programDay">—</div>
+            <div style="font-size:.75rem;color:var(--muted)">Current Day</div>
+          </div>
+          <div>
+            <div style="font-size:2rem;font-weight:800;color:var(--emerald)" id="programRemain">—</div>
+            <div style="font-size:.75rem;color:var(--muted)">Days Remaining</div>
+          </div>
+        </div>
+        <div class="prog-wrap">
+          <div class="prog-track"><div class="prog-fill" id="programProgressBar" style="width:0%"></div></div>
+        </div>
+
+        <div style="margin-top:20px">
+          <div class="field-label">Today's tasks</div>
+          <div id="programTasks"></div>
+        </div>
+
+        <button class="btn" id="programCompleteDayBtn" style="margin-top:16px">Mark Day Complete</button>
+        <div class="status-msg" id="programDayStatus"></div>
+      </div>
+
+      <div class="card">
+        <div class="card-title">Progress</div>
+        <div class="day-grid" id="programDayGrid"></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ══ WEEKLY REVIEW ══ -->
+  <div class="dash-panel" id="panel-review">
+    <div class="section-header">
+      <h1>Weekly Review</h1>
+      <p>Reflect on the week. The system will generate suggestions and a reflection for you.</p>
+    </div>
+
+    <div class="grid-2" style="align-items:start">
+      <div class="card">
+        <div class="card-title">This Week's Review</div>
+        <div class="review-q">
+          <label class="field-label">What worked well this week?</label>
+          <textarea class="field" id="reviewWorked" placeholder="Your morning routine, a habit you kept…"></textarea>
+        </div>
+        <div class="review-q">
+          <label class="field-label">What distracted or derailed you?</label>
+          <textarea class="field" id="reviewDistracted" placeholder="Phone usage, skipped sessions…"></textarea>
+        </div>
+        <div class="review-q">
+          <label class="field-label">What will you change next week?</label>
+          <textarea class="field" id="reviewChange" placeholder="One specific action you'll take differently…"></textarea>
+        </div>
+        <button class="btn" id="reviewSubmitBtn">Submit Review</button>
+        <div class="status-msg" id="reviewStatus"></div>
+      </div>
+
+      <div>
+        <div class="card" id="reviewResultCard" style="display:none">
+          <div class="card-title">Reflection</div>
+          <p id="reviewReflectionText" style="font-size:.9rem;line-height:1.65;color:var(--muted);margin-bottom:18px;"></p>
+          <div class="card-title" style="font-size:.85rem;">Suggestions</div>
+          <ul id="reviewSuggestionsList" style="padding-left:18px;display:flex;flex-direction:column;gap:8px;font-size:.85rem;color:var(--muted);"></ul>
+        </div>
+
+        <div class="card" style="margin-top:20px" id="reviewHistoryCard">
+          <div class="card-title">Past Reviews</div>
+          <div id="reviewHistoryList"><div class="empty">No reviews yet.</div></div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ══ PRODUCTIVITY ══ -->
+  <div class="dash-panel" id="panel-productivity">
+    <div class="section-header">
+      <h1>Productivity</h1>
+      <p>Water tracker and daily planner.</p>
+    </div>
+
+    <div class="grid-2" style="align-items:start">
+      <!-- Water tracker -->
+      <div class="card">
+        <div class="card-title">Water Tracker</div>
+        <div style="display:flex;align-items:baseline;gap:8px">
+          <div class="water-count" id="waterCount">0</div>
+          <div class="water-goal">/ <span id="waterGoal">8</span> glasses</div>
+        </div>
+        <div class="water-glasses" id="waterGlasses"></div>
+        <div class="prog-wrap">
+          <div class="prog-track"><div class="prog-fill" id="waterBar" style="width:0%;background:linear-gradient(90deg,#3b82f6,#60a5fa)"></div></div>
+        </div>
+        <button class="btn btn-sm" id="logWaterBtn" style="margin-top:14px">+ Log a Glass (250ml)</button>
+        <div class="status-msg" id="waterStatus"></div>
+      </div>
+
+      <!-- Planner -->
+      <div class="card">
+        <div class="card-title">Today's Planner</div>
+        <div id="plannerList"><div class="empty">No tasks yet.</div></div>
+        <div style="margin-top:14px;display:flex;flex-direction:column;gap:8px">
+          <input class="field" id="plannerTitle" placeholder="Task title…" />
+          <div class="field-row">
+            <select class="field" id="plannerPriority" style="flex:1">
+              <option value="high">High</option>
+              <option value="medium" selected>Medium</option>
+              <option value="low">Low</option>
+            </select>
+            <input class="field" id="plannerSlot" placeholder="Time (e.g. 09:00–10:00)" style="flex:2">
+          </div>
+          <button class="btn btn-sm" id="plannerAddBtn">Add Task</button>
+          <div class="status-msg" id="plannerStatus"></div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ══ STUDY ══ -->
+  <div class="dash-panel" id="panel-study">
+    <div class="section-header">
+      <h1>Study Tools</h1>
+      <p>Spaced repetition and brainstorm board.</p>
+    </div>
+
+    <div class="grid-2" style="align-items:start">
+      <!-- Spaced repetition -->
+      <div class="card">
+        <div class="card-title">Spaced Repetition  <span id="srDueCount" style="margin-left:auto;font-size:.8rem;color:var(--violet);font-weight:700"></span></div>
+
+        <!-- Review mode -->
+        <div id="srReviewMode" style="display:none">
+          <div class="sr-card-face" id="srCardFace" title="Tap to reveal answer">Tap to reveal…</div>
+          <div id="srAnswerWrap" style="display:none">
+            <div class="sr-card-face" id="srCardBack" style="margin-top:10px;border-color:rgba(16,185,129,.25)"></div>
+            <div class="sr-ease-btns">
+              <button class="ease-btn ease-1" data-ease="1">Again</button>
+              <button class="ease-btn ease-2" data-ease="2">Hard</button>
+              <button class="ease-btn ease-3" data-ease="3">Good</button>
+              <button class="ease-btn ease-4" data-ease="4">Easy</button>
+            </div>
+          </div>
+          <div class="status-msg" id="srStatus"></div>
+        </div>
+        <div id="srDoneState" style="display:none;text-align:center;padding:24px 0;">
+          <div style="font-size:1.4rem">🎉</div>
+          <div style="font-size:.9rem;color:var(--muted);margin-top:8px">All due cards reviewed.</div>
+        </div>
+        <div id="srEmptyState">
+          <div class="empty">No cards due. Add some below.</div>
+        </div>
+
+        <!-- Add card form -->
+        <div style="margin-top:20px;border-top:1px solid rgba(255,255,255,.07);padding-top:16px">
+          <div class="field-label">Add a new card</div>
+          <input class="field" id="srDeck" placeholder="Deck name (e.g. Spanish)" style="margin-bottom:8px">
+          <input class="field" id="srFront" placeholder="Front (question or term)" style="margin-bottom:8px">
+          <input class="field" id="srBack" placeholder="Back (answer or definition)" style="margin-bottom:8px">
+          <button class="btn btn-sm" id="srAddBtn">Add Card</button>
+          <div class="status-msg" id="srAddStatus"></div>
+        </div>
+      </div>
+
+      <!-- Brainstorm -->
+      <div class="card">
+        <div class="card-title">Brainstorm</div>
+
+        <!-- Session list -->
+        <div id="brainstormList" style="margin-bottom:14px"><div class="empty">No sessions yet.</div></div>
+
+        <!-- Active session -->
+        <div id="brainstormActive" style="display:none">
+          <div style="display:flex;align-items:center;gap:10px;margin-bottom:14px">
+            <div style="font-weight:600;font-size:.95rem" id="brainstormTitle"></div>
+            <button class="btn btn-secondary btn-sm" id="brainstormBackBtn">← All Sessions</button>
+          </div>
+          <div id="brainstormIdeas"></div>
+          <div class="field-row" style="margin-top:10px">
+            <input class="field" id="brainstormIdeaInput" placeholder="New idea…" style="flex:1">
+            <button class="btn btn-sm" id="brainstormAddIdeaBtn">Add</button>
+          </div>
+          <div class="status-msg" id="brainstormIdeaStatus"></div>
+        </div>
+
+        <!-- New session form -->
+        <div style="border-top:1px solid rgba(255,255,255,.07);padding-top:14px;margin-top:4px">
+          <div class="field-row">
+            <input class="field" id="brainstormNewTitle" placeholder="New session title…" style="flex:1">
+            <button class="btn btn-sm" id="brainstormCreateBtn">Create</button>
+          </div>
+          <div class="status-msg" id="brainstormStatus"></div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ══ REWARDS ══ -->
+  <div class="dash-panel" id="panel-rewards">
+    <div class="section-header">
+      <h1>Rewards</h1>
+      <p>Unlock cosmetic rewards through consistency. No points displays — just quiet, earned progression.</p>
+    </div>
+    <div class="card" style="margin-bottom:20px">
+      <div class="card-title">Check for New Unlocks</div>
+      <div class="field-row">
+        <div style="flex:1">
+          <label class="field-label">Current streak (days)</label>
+          <input class="field" id="rewardStreakInput" type="number" min="0" value="0">
+        </div>
+        <div style="flex:1">
+          <label class="field-label">Completed programs</label>
+          <input class="field" id="rewardProgramInput" type="number" min="0" value="0">
+        </div>
+        <div style="flex:1">
+          <label class="field-label">Weekly reviews done</label>
+          <input class="field" id="rewardReviewInput" type="number" min="0" value="0">
+        </div>
+      </div>
+      <button class="btn btn-sm" id="rewardCheckBtn" style="margin-top:14px">Check Unlocks</button>
+      <div class="status-msg" id="rewardCheckStatus"></div>
+    </div>
+
+    <div class="card">
+      <div class="card-title">Reward Catalog</div>
+      <div class="grid-3" id="rewardCatalog"><div class="empty">Loading…</div></div>
+    </div>
+  </div>
+
+  <!-- ══ CHAT ══ -->
+  <div class="dash-panel" id="panel-chat">
+    <div class="section-header">
+      <h1>Chat</h1>
+      <p>Direct messages and challenge conversations.</p>
+    </div>
+
+    <div class="grid-2" style="align-items:start">
+      <!-- Conversation list / search -->
+      <div class="card">
+        <div class="card-title">Conversations</div>
+        <div class="field-row" style="margin-bottom:14px">
+          <input class="field" id="chatSearchInput" placeholder="Search users by email…" style="flex:1">
+          <button class="btn btn-sm" id="chatSearchBtn">Search</button>
+        </div>
+        <div id="chatSearchResults" style="display:none;margin-bottom:12px;"></div>
+        <div class="chat-conv-list" id="convList"><div class="empty">No conversations yet.</div></div>
+      </div>
+
+      <!-- Message thread -->
+      <div class="card" id="chatThreadCard" style="display:none">
+        <div style="display:flex;align-items:center;gap:10px;margin-bottom:14px">
+          <button class="btn btn-secondary btn-sm" id="chatBackBtn">←</button>
+          <div style="font-weight:600" id="chatThreadTitle">Conversation</div>
+        </div>
+        <div class="msg-list" id="msgList"></div>
+        <div class="field-row" style="margin-top:10px">
+          <input class="field" id="msgInput" placeholder="Type a message…" style="flex:1">
+          <button class="btn btn-sm" id="msgSendBtn">Send</button>
+        </div>
+        <div class="status-msg" id="chatStatus"></div>
+      </div>
+
+      <div class="card" id="chatPlaceholderCard">
+        <div class="empty" style="padding:40px 0">Select a conversation to start messaging.</div>
+      </div>
+    </div>
+  </div>
+
+</main>
+
+<script type="module" src="js/modules/dashboard.js"></script>
+</body>
+</html>

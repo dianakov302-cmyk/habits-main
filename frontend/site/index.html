@@ -1,0 +1,965 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Anaida Space — Build Discipline Through Intelligent Habits</title>
+  <meta name="description" content="Anaida Space — a premium self-development platform. Build discipline through personalized habit systems, identity progression, and 30-day programs.">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700;800;900&family=Dancing+Script:wght@700&family=Space+Mono:wght@400;700&family=Bebas+Neue&family=Playfair+Display:ital,wght@0,700;1,400;1,700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="css/style.css">
+
+  <style>
+    /* ── Landing page overrides ── */
+    html { scroll-behavior: smooth; }
+    body[data-page="home"] {
+      background: #080814;
+      overflow-x: hidden;
+    }
+
+    /* ══ TOP NAV ══ */
+    .lp-nav {
+      position: fixed;
+      top: 0; left: 0; right: 0;
+      z-index: 200;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 20px 48px;
+      transition: background .35s, backdrop-filter .35s, padding .35s;
+    }
+    .lp-nav.scrolled {
+      background: rgba(8, 8, 20, 0.82);
+      backdrop-filter: blur(18px);
+      -webkit-backdrop-filter: blur(18px);
+      border-bottom: 1px solid rgba(255,255,255,.06);
+      padding: 14px 48px;
+    }
+    .lp-nav-brand {
+      font-family: 'Space Mono', monospace;
+      font-size: .8rem;
+      font-weight: 700;
+      letter-spacing: 4px;
+      text-transform: uppercase;
+      background: linear-gradient(135deg, #c4b5fd, #8b5cf6, #10b981);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      background-clip: text;
+      text-decoration: none;
+    }
+    .lp-nav-links {
+      display: flex;
+      align-items: center;
+      gap: 36px;
+      list-style: none;
+    }
+    .lp-nav-links a {
+      font-family: 'Outfit', sans-serif;
+      font-size: .88rem;
+      color: rgba(255,255,255,.65);
+      text-decoration: none;
+      transition: color .2s;
+      letter-spacing: .5px;
+    }
+    .lp-nav-links a:hover { color: rgba(255,255,255,.95); }
+    .lp-nav-avatar {
+      width: 34px; height: 34px;
+      border-radius: 50%;
+      background: rgba(255,255,255,.1);
+      border: 1px solid rgba(139,92,246,.4);
+      cursor: pointer;
+      display: flex; align-items: center; justify-content: center;
+      text-decoration: none;
+      transition: background .2s, border-color .2s, box-shadow .2s;
+    }
+    .lp-nav-avatar:hover {
+      background: rgba(139,92,246,.2);
+      border-color: rgba(139,92,246,.7);
+      box-shadow: 0 0 14px rgba(139,92,246,.35);
+    }
+    .lp-nav-avatar svg { width: 16px; height: 16px; color: rgba(255,255,255,.7); }
+
+    @media (max-width: 700px) {
+      .lp-nav { padding: 16px 20px; }
+      .lp-nav.scrolled { padding: 12px 20px; }
+      .lp-nav-links { gap: 18px; }
+      .lp-nav-links li:nth-child(1),
+      .lp-nav-links li:nth-child(2) { display: none; }
+    }
+
+    /* ══ HERO ══ */
+    .lp-hero {
+      position: relative;
+      height: 100vh;
+      min-height: 680px;
+      display: flex;
+      align-items: center;
+      overflow: hidden;
+    }
+    .lp-hero-bg {
+      position: absolute;
+      inset: 0;
+      background-image: url('/img/cosmos_1779123708.jpeg');
+      background-size: cover;
+      background-position: center 30%;
+      transform: scale(1.08);
+      transition: transform 12s ease;
+    }
+    .lp-hero-bg::after {
+      content: '';
+      position: absolute;
+      inset: 0;
+      background: rgba(8,8,20,0.60);
+    }
+    .lp-hero-gradient {
+      position: absolute;
+      inset: 0;
+      background:
+        radial-gradient(ellipse at 10% 50%, rgba(139,92,246,.18) 0%, transparent 55%),
+        radial-gradient(ellipse at 90% 80%, rgba(16,185,129,.10) 0%, transparent 45%),
+        linear-gradient(to bottom, transparent 60%, rgba(8,8,20,.9) 100%);
+      z-index: 1;
+      pointer-events: none;
+    }
+    .lp-hero-person {
+      position: absolute;
+      right: 5%;
+      bottom: 0;
+      height: 95%;
+      max-height: 860px;
+      object-fit: contain;
+      object-position: bottom;
+      z-index: 2;
+      filter: drop-shadow(0 0 60px rgba(139,92,246,.18));
+    }
+    .lp-hero-content {
+      position: relative;
+      z-index: 3;
+      max-width: 700px;
+      padding: 0 48px;
+      margin-top: 40px;
+    }
+    .lp-hero-kicker {
+      font-family: 'Space Mono', monospace;
+      font-size: .7rem;
+      letter-spacing: 4px;
+      text-transform: uppercase;
+      color: rgba(196,181,253,.75);
+      margin-bottom: 20px;
+      display: block;
+    }
+    .lp-hero-title {
+      font-family: 'Outfit', sans-serif;
+      font-weight: 800;
+      font-size: clamp(3rem, 6.5vw, 5.5rem);
+      line-height: 1.05;
+      letter-spacing: -1px;
+      color: #f8fafc;
+      margin-bottom: 10px;
+    }
+    .lp-hero-title .gradient-headline {
+      background: linear-gradient(135deg, #c4b5fd 0%, #8b5cf6 45%, #10b981 100%);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      background-clip: text;
+    }
+    .lp-hero-sub {
+      font-family: 'Outfit', sans-serif;
+      font-size: clamp(1rem, 1.8vw, 1.2rem);
+      color: rgba(255,255,255,.62);
+      line-height: 1.75;
+      max-width: 500px;
+      margin: 24px 0 40px;
+    }
+    .lp-hero-ctas {
+      display: flex;
+      gap: 14px;
+      flex-wrap: wrap;
+    }
+    .btn-primary {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      padding: 14px 28px;
+      background: linear-gradient(135deg, #8b5cf6, #7c3aed);
+      color: #fff;
+      font-family: 'Outfit', sans-serif;
+      font-size: .95rem;
+      font-weight: 700;
+      border-radius: 999px;
+      text-decoration: none;
+      border: none;
+      cursor: pointer;
+      transition: transform .25s, box-shadow .25s;
+      box-shadow: 0 4px 24px rgba(139,92,246,.4);
+    }
+    .btn-primary:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 8px 36px rgba(139,92,246,.55);
+    }
+    .btn-ghost {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      padding: 13px 28px;
+      background: rgba(255,255,255,.08);
+      color: rgba(255,255,255,.82);
+      font-family: 'Outfit', sans-serif;
+      font-size: .95rem;
+      font-weight: 600;
+      border-radius: 999px;
+      text-decoration: none;
+      border: 1px solid rgba(255,255,255,.14);
+      cursor: pointer;
+      transition: background .25s, border-color .25s;
+    }
+    .btn-ghost:hover {
+      background: rgba(255,255,255,.14);
+      border-color: rgba(255,255,255,.28);
+    }
+    .lp-hero-scroll {
+      position: absolute;
+      bottom: 32px;
+      left: 50%;
+      transform: translateX(-50%);
+      z-index: 4;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 8px;
+      color: rgba(255,255,255,.3);
+      font-family: 'Space Mono', monospace;
+      font-size: .6rem;
+      letter-spacing: 3px;
+      text-transform: uppercase;
+      animation: heroScrollBounce 2.2s ease-in-out infinite;
+    }
+    .lp-hero-scroll-mouse {
+      width: 22px; height: 36px;
+      border: 1.5px solid rgba(255,255,255,.22);
+      border-radius: 12px;
+      position: relative;
+      display: flex;
+      justify-content: center;
+    }
+    .lp-hero-scroll-dot {
+      width: 3px; height: 8px;
+      background: rgba(255,255,255,.4);
+      border-radius: 3px;
+      margin-top: 6px;
+      animation: scrollDotBounce 2s ease-in-out infinite;
+    }
+    @keyframes heroScrollBounce {
+      0%,100%{ transform: translateX(-50%) translateY(0); }
+      50%{ transform: translateX(-50%) translateY(7px); }
+    }
+
+    @media (max-width: 700px) {
+      .lp-hero-content { padding: 0 22px; margin-top: 60px; }
+      .lp-hero-person { height: 55%; right: 0; opacity: .5; }
+      .lp-hero-title { font-size: clamp(2.5rem, 10vw, 3.8rem); }
+    }
+
+    /* ══ HOW IT WORKS ══ */
+    .lp-how {
+      padding: 120px 48px;
+      background: #080814;
+      position: relative;
+    }
+    .lp-how::before {
+      content: '';
+      position: absolute;
+      top: 0; left: 0; right: 0;
+      height: 1px;
+      background: linear-gradient(to right, transparent, rgba(139,92,246,.3), rgba(16,185,129,.2), transparent);
+    }
+    .lp-section-label {
+      font-family: 'Space Mono', monospace;
+      font-size: .68rem;
+      letter-spacing: 4px;
+      text-transform: uppercase;
+      color: rgba(139,92,246,.75);
+      margin-bottom: 16px;
+      display: block;
+    }
+    .lp-section-title {
+      font-family: 'Outfit', sans-serif;
+      font-weight: 800;
+      font-size: clamp(2rem, 4vw, 3rem);
+      color: #f8fafc;
+      line-height: 1.15;
+      margin-bottom: 14px;
+    }
+    .lp-section-sub {
+      font-family: 'Outfit', sans-serif;
+      font-size: 1.05rem;
+      color: rgba(255,255,255,.55);
+      max-width: 500px;
+      line-height: 1.7;
+      margin-bottom: 72px;
+    }
+    .lp-how-grid {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 24px;
+      max-width: 1100px;
+      margin: 0 auto;
+    }
+    .lp-how-card {
+      background: rgba(30,41,59,.55);
+      backdrop-filter: blur(16px);
+      -webkit-backdrop-filter: blur(16px);
+      border: 1px solid rgba(255,255,255,.07);
+      border-radius: 22px;
+      padding: 40px 32px;
+      position: relative;
+      overflow: hidden;
+      transition: transform .3s, border-color .3s, box-shadow .3s;
+    }
+    .lp-how-card::before {
+      content: '';
+      position: absolute;
+      top: 0; left: 0; right: 0;
+      height: 2px;
+      background: linear-gradient(to right, transparent, rgba(139,92,246,.5), transparent);
+      opacity: 0;
+      transition: opacity .3s;
+    }
+    .lp-how-card:hover {
+      transform: translateY(-6px);
+      border-color: rgba(139,92,246,.22);
+      box-shadow: 0 24px 60px rgba(0,0,0,.4), 0 0 0 1px rgba(139,92,246,.08);
+    }
+    .lp-how-card:hover::before { opacity: 1; }
+    .lp-how-step {
+      font-family: 'Space Mono', monospace;
+      font-size: .7rem;
+      letter-spacing: 3px;
+      text-transform: uppercase;
+      color: rgba(139,92,246,.65);
+      margin-bottom: 24px;
+      display: block;
+    }
+    .lp-how-icon {
+      width: 52px; height: 52px;
+      border-radius: 16px;
+      background: rgba(139,92,246,.12);
+      border: 1px solid rgba(139,92,246,.2);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      margin-bottom: 22px;
+      font-size: 1.5rem;
+    }
+    .lp-how-card h3 {
+      font-family: 'Outfit', sans-serif;
+      font-weight: 700;
+      font-size: 1.25rem;
+      color: #f8fafc;
+      margin-bottom: 12px;
+    }
+    .lp-how-card p {
+      font-family: 'Outfit', sans-serif;
+      font-size: .9rem;
+      color: rgba(255,255,255,.58);
+      line-height: 1.75;
+    }
+    .lp-how-step-num {
+      position: absolute;
+      bottom: 24px; right: 28px;
+      font-family: 'Space Mono', monospace;
+      font-size: 4rem;
+      font-weight: 700;
+      color: rgba(139,92,246,.06);
+      line-height: 1;
+      user-select: none;
+    }
+
+    @media (max-width: 900px) {
+      .lp-how-grid { grid-template-columns: 1fr; gap: 16px; }
+      .lp-how { padding: 80px 24px; }
+    }
+
+    /* ══ FEATURES ══ */
+    .lp-features {
+      padding: 120px 48px;
+      background:
+        radial-gradient(ellipse at 70% 0%, rgba(139,92,246,.1) 0%, transparent 55%),
+        radial-gradient(ellipse at 20% 100%, rgba(16,185,129,.07) 0%, transparent 50%),
+        #08091a;
+      position: relative;
+    }
+    .lp-features::before {
+      content: '';
+      position: absolute;
+      top: 0; left: 0; right: 0;
+      height: 1px;
+      background: linear-gradient(to right, transparent, rgba(16,185,129,.25), rgba(139,92,246,.2), transparent);
+    }
+    .lp-features-grid {
+      display: grid;
+      grid-template-columns: repeat(2, 1fr);
+      gap: 20px;
+      max-width: 1100px;
+      margin: 0 auto;
+    }
+    .lp-feat-card {
+      background: rgba(30,41,59,.45);
+      backdrop-filter: blur(12px);
+      -webkit-backdrop-filter: blur(12px);
+      border: 1px solid rgba(255,255,255,.07);
+      border-radius: 20px;
+      padding: 36px;
+      display: flex;
+      gap: 24px;
+      align-items: flex-start;
+      transition: transform .3s, border-color .3s, background .3s;
+    }
+    .lp-feat-card:hover {
+      transform: translateY(-4px);
+      border-color: rgba(139,92,246,.2);
+      background: rgba(30,41,59,.7);
+    }
+    .lp-feat-icon {
+      width: 48px; height: 48px;
+      border-radius: 14px;
+      flex-shrink: 0;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 1.4rem;
+    }
+    .lp-feat-icon--violet { background: rgba(139,92,246,.15); border: 1px solid rgba(139,92,246,.25); }
+    .lp-feat-icon--emerald { background: rgba(16,185,129,.12); border: 1px solid rgba(16,185,129,.2); }
+    .lp-feat-icon--blue { background: rgba(56,189,248,.12); border: 1px solid rgba(56,189,248,.2); }
+    .lp-feat-icon--amber { background: rgba(245,158,11,.12); border: 1px solid rgba(245,158,11,.2); }
+    .lp-feat-body h4 {
+      font-family: 'Outfit', sans-serif;
+      font-weight: 700;
+      font-size: 1.1rem;
+      color: #f8fafc;
+      margin-bottom: 8px;
+    }
+    .lp-feat-body p {
+      font-family: 'Outfit', sans-serif;
+      font-size: .88rem;
+      color: rgba(255,255,255,.55);
+      line-height: 1.7;
+    }
+    .lp-feat-tag {
+      display: inline-block;
+      margin-top: 10px;
+      font-family: 'Space Mono', monospace;
+      font-size: .62rem;
+      letter-spacing: 2px;
+      text-transform: uppercase;
+      padding: 4px 10px;
+      border-radius: 999px;
+      border: 1px solid rgba(139,92,246,.25);
+      color: rgba(196,181,253,.7);
+    }
+
+    @media (max-width: 900px) {
+      .lp-features-grid { grid-template-columns: 1fr; }
+      .lp-features { padding: 80px 24px; }
+    }
+
+    /* ══ IDENTITY BANNER ══ */
+    .lp-identity {
+      padding: 100px 48px;
+      background: #080814;
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 60px;
+      align-items: center;
+      max-width: 1200px;
+      margin: 0 auto;
+    }
+    .lp-identity-img {
+      position: relative;
+      border-radius: 24px;
+      overflow: hidden;
+      aspect-ratio: 4/5;
+    }
+    .lp-identity-img img {
+      width: 100%; height: 100%;
+      object-fit: cover;
+      object-position: center;
+    }
+    .lp-identity-img::after {
+      content: '';
+      position: absolute;
+      inset: 0;
+      background: linear-gradient(to bottom, transparent 40%, rgba(8,8,20,.85) 100%);
+    }
+    .lp-identity-levels {
+      position: absolute;
+      bottom: 24px; left: 24px; right: 24px;
+      z-index: 2;
+      display: flex;
+      flex-wrap: wrap;
+      gap: 6px;
+    }
+    .lp-id-level {
+      font-family: 'Space Mono', monospace;
+      font-size: .6rem;
+      letter-spacing: 2px;
+      text-transform: uppercase;
+      padding: 5px 10px;
+      border-radius: 999px;
+      border: 1px solid rgba(255,255,255,.15);
+      color: rgba(255,255,255,.6);
+      background: rgba(8,8,20,.5);
+      backdrop-filter: blur(8px);
+    }
+    .lp-id-level.active {
+      border-color: rgba(139,92,246,.6);
+      color: #c4b5fd;
+      background: rgba(139,92,246,.2);
+    }
+    .lp-identity-content .lp-section-sub { margin-bottom: 36px; }
+    .lp-identity-stat {
+      display: flex;
+      flex-direction: column;
+      gap: 12px;
+      margin-top: 32px;
+    }
+    .lp-id-stat-row {
+      display: flex;
+      align-items: center;
+      gap: 14px;
+    }
+    .lp-id-stat-label {
+      font-family: 'Space Mono', monospace;
+      font-size: .68rem;
+      letter-spacing: 2px;
+      text-transform: uppercase;
+      color: rgba(255,255,255,.45);
+      min-width: 140px;
+    }
+    .lp-id-stat-bar {
+      flex: 1;
+      height: 4px;
+      background: rgba(255,255,255,.07);
+      border-radius: 4px;
+      overflow: hidden;
+    }
+    .lp-id-stat-fill {
+      height: 100%;
+      border-radius: 4px;
+      background: linear-gradient(to right, #8b5cf6, #10b981);
+    }
+    .lp-id-stat-val {
+      font-family: 'Space Mono', monospace;
+      font-size: .72rem;
+      color: rgba(255,255,255,.55);
+      min-width: 32px;
+      text-align: right;
+    }
+
+    @media (max-width: 900px) {
+      .lp-identity { grid-template-columns: 1fr; padding: 70px 24px; gap: 40px; }
+      .lp-identity-img { aspect-ratio: 16/9; }
+    }
+
+    /* ══ CTA BAND ══ */
+    .lp-cta-band {
+      position: relative;
+      padding: 120px 48px;
+      text-align: center;
+      overflow: hidden;
+    }
+    .lp-cta-band-bg {
+      position: absolute;
+      inset: 0;
+      background-image: url('/img/cosmos_316863339.jpeg');
+      background-size: cover;
+      background-position: center;
+      filter: brightness(.35) saturate(.7);
+    }
+    .lp-cta-band-overlay {
+      position: absolute;
+      inset: 0;
+      background:
+        radial-gradient(ellipse at 50% 50%, rgba(139,92,246,.18) 0%, transparent 65%),
+        rgba(8,8,20,.5);
+    }
+    .lp-cta-band-content {
+      position: relative;
+      z-index: 2;
+      max-width: 620px;
+      margin: 0 auto;
+    }
+    .lp-cta-band h2 {
+      font-family: 'Outfit', sans-serif;
+      font-weight: 800;
+      font-size: clamp(2.2rem, 5vw, 3.6rem);
+      color: #f8fafc;
+      line-height: 1.15;
+      margin-bottom: 18px;
+    }
+    .lp-cta-band p {
+      font-family: 'Outfit', sans-serif;
+      font-size: 1.1rem;
+      color: rgba(255,255,255,.62);
+      line-height: 1.75;
+      margin-bottom: 44px;
+    }
+
+    @media (max-width: 700px) {
+      .lp-cta-band { padding: 80px 24px; }
+    }
+
+    /* ══ FOOTER ══ */
+    .lp-footer {
+      background: #05050e;
+      padding: 56px 48px 36px;
+      border-top: 1px solid rgba(255,255,255,.05);
+    }
+    .lp-footer-inner {
+      max-width: 1100px;
+      margin: 0 auto;
+      display: flex;
+      justify-content: space-between;
+      align-items: flex-start;
+      gap: 40px;
+      flex-wrap: wrap;
+      margin-bottom: 44px;
+    }
+    .lp-footer-brand {
+      font-family: 'Space Mono', monospace;
+      font-size: .78rem;
+      font-weight: 700;
+      letter-spacing: 4px;
+      text-transform: uppercase;
+      background: linear-gradient(135deg, #c4b5fd, #8b5cf6, #10b981);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      background-clip: text;
+      margin-bottom: 10px;
+    }
+    .lp-footer-tagline {
+      font-family: 'Outfit', sans-serif;
+      font-size: .82rem;
+      color: rgba(255,255,255,.38);
+      max-width: 240px;
+      line-height: 1.6;
+    }
+    .lp-footer-links {
+      display: flex;
+      gap: 60px;
+    }
+    .lp-footer-col h5 {
+      font-family: 'Space Mono', monospace;
+      font-size: .62rem;
+      letter-spacing: 3px;
+      text-transform: uppercase;
+      color: rgba(255,255,255,.35);
+      margin-bottom: 14px;
+    }
+    .lp-footer-col a {
+      display: block;
+      font-family: 'Outfit', sans-serif;
+      font-size: .84rem;
+      color: rgba(255,255,255,.5);
+      text-decoration: none;
+      margin-bottom: 8px;
+      transition: color .2s;
+    }
+    .lp-footer-col a:hover { color: rgba(255,255,255,.85); }
+    .lp-footer-bottom {
+      max-width: 1100px;
+      margin: 0 auto;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      gap: 20px;
+      padding-top: 20px;
+      border-top: 1px solid rgba(255,255,255,.05);
+      flex-wrap: wrap;
+    }
+    .lp-footer-copy {
+      font-family: 'Space Mono', monospace;
+      font-size: .62rem;
+      color: rgba(255,255,255,.25);
+      letter-spacing: 1px;
+    }
+
+    @media (max-width: 700px) {
+      .lp-footer { padding: 48px 24px 28px; }
+      .lp-footer-inner { gap: 32px; }
+      .lp-footer-links { gap: 32px; }
+    }
+
+    /* ══ SECTION REVEAL ANIMATIONS ══ */
+    .lp-reveal {
+      opacity: 0;
+      transform: translateY(28px);
+      transition: opacity .8s ease, transform .8s ease;
+    }
+    .lp-reveal.visible { opacity: 1; transform: translateY(0); }
+    .lp-reveal-delay-1 { transition-delay: .1s; }
+    .lp-reveal-delay-2 { transition-delay: .22s; }
+    .lp-reveal-delay-3 { transition-delay: .34s; }
+    .lp-reveal-delay-4 { transition-delay: .46s; }
+  </style>
+</head>
+<body data-page="home">
+
+<!-- ══ NAV ══ -->
+<nav class="lp-nav" id="lpNav">
+  <a class="lp-nav-brand" href="index.html">ANAIDA SPACE</a>
+  <ul class="lp-nav-links">
+    <li><a href="#how-it-works">How it Works</a></li>
+    <li><a href="#features">Features</a></li>
+    <li><a href="registration.html">Start</a></li>
+  </ul>
+  <a href="registration.html" class="lp-nav-avatar" title="Sign in">
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8">
+      <circle cx="12" cy="8" r="4"/><path d="M4 20c0-4 3.6-7 8-7s8 3 8 7"/>
+    </svg>
+  </a>
+</nav>
+
+<!-- ══ HERO SECTION ══ -->
+<section class="lp-hero" id="hero">
+  <div class="lp-hero-bg" id="lpHeroBg"></div>
+  <div class="lp-hero-gradient"></div>
+  <img
+    src="/img/wmremove-transformed.png"
+    alt="Anaida Space — Build Your Identity"
+    class="lp-hero-person"
+    onerror="this.style.display='none'"
+  >
+  <div class="lp-hero-content">
+    <span class="lp-hero-kicker">Build Discipline. Become Elite.</span>
+    <h1 class="lp-hero-title">
+      Build discipline<br>through
+      <span class="gradient-headline">intelligent</span><br>habits.
+    </h1>
+    <p class="lp-hero-sub">
+      Anaida Space is your adaptive self-development platform — powered by identity-based habit systems, 30-day programs, and community accountability.
+    </p>
+    <div class="lp-hero-ctas">
+      <a href="registration.html" class="btn-primary">
+        Start Your Journey
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M5 12h14M12 5l7 7-7 7"/></svg>
+      </a>
+      <a href="#how-it-works" class="btn-ghost">See How It Works</a>
+    </div>
+  </div>
+  <div class="lp-hero-scroll">
+    <div class="lp-hero-scroll-mouse">
+      <div class="lp-hero-scroll-dot"></div>
+    </div>
+    <span>Scroll</span>
+  </div>
+</section>
+
+<!-- ══ HOW IT WORKS ══ -->
+<section class="lp-how" id="how-it-works">
+  <div style="max-width:1100px;margin:0 auto;">
+    <span class="lp-section-label lp-reveal">Process</span>
+    <h2 class="lp-section-title lp-reveal lp-reveal-delay-1">Three steps to a new identity.</h2>
+    <p class="lp-section-sub lp-reveal lp-reveal-delay-2">No guesswork. No gamification. A psychologically intelligent system built around who you want to become.</p>
+    <div class="lp-how-grid">
+      <div class="lp-how-card lp-reveal lp-reveal-delay-1">
+        <span class="lp-how-step">Step 01</span>
+        <div class="lp-how-icon">🧠</div>
+        <h3>Assess Your Starting Point</h3>
+        <p>Take a structured self-assessment that maps your current habits, discipline patterns, and identity score to a personalised baseline.</p>
+        <span class="lp-how-step-num">01</span>
+      </div>
+      <div class="lp-how-card lp-reveal lp-reveal-delay-2">
+        <span class="lp-how-step">Step 02</span>
+        <div class="lp-how-icon">🏗️</div>
+        <h3>Build Your Habit System</h3>
+        <p>Your daily protocol is crafted around Minimum, Target, and Bonus actions. Show up every day — the system scales with your consistency.</p>
+        <span class="lp-how-step-num">02</span>
+      </div>
+      <div class="lp-how-card lp-reveal lp-reveal-delay-3">
+        <span class="lp-how-step">Step 03</span>
+        <div class="lp-how-icon">📈</div>
+        <h3>Progress Your Identity</h3>
+        <p>Watch your identity score climb from Explorer to Elite as streaks, weekly reviews, and completed 30-day programs compound over time.</p>
+        <span class="lp-how-step-num">03</span>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ══ FEATURES ══ -->
+<section class="lp-features" id="features">
+  <div style="max-width:1100px;margin:0 auto;">
+    <span class="lp-section-label lp-reveal">Features</span>
+    <h2 class="lp-section-title lp-reveal lp-reveal-delay-1">Everything you need.<br>Nothing you don't.</h2>
+    <p class="lp-section-sub lp-reveal lp-reveal-delay-2">Apple-level minimalism meets psychological depth. Every feature earns its place.</p>
+    <div class="lp-features-grid">
+      <div class="lp-feat-card lp-reveal lp-reveal-delay-1">
+        <div class="lp-feat-icon lp-feat-icon--violet">⚡</div>
+        <div class="lp-feat-body">
+          <h4>Daily Protocol</h4>
+          <p>Three-tier daily structure — Minimum, Target, Bonus — so you always win the day, even on your worst days.</p>
+          <span class="lp-feat-tag">Core Feature</span>
+        </div>
+      </div>
+      <div class="lp-feat-card lp-reveal lp-reveal-delay-2">
+        <div class="lp-feat-icon lp-feat-icon--emerald">🎯</div>
+        <div class="lp-feat-body">
+          <h4>Identity Score</h4>
+          <p>A 0-100 score built from streaks, completion rates, and weekly reviews. Progress through: Lost → Explorer → Builder → Elite.</p>
+          <span class="lp-feat-tag">Identity System</span>
+        </div>
+      </div>
+      <div class="lp-feat-card lp-reveal lp-reveal-delay-3">
+        <div class="lp-feat-icon lp-feat-icon--blue">📅</div>
+        <div class="lp-feat-body">
+          <h4>30-Day Programs</h4>
+          <p>Three adaptive phases — START, RHYTHM, REINFORCEMENT. Content intelligently adapts to your goal and current identity level.</p>
+          <span class="lp-feat-tag">Programs</span>
+        </div>
+      </div>
+      <div class="lp-feat-card lp-reveal lp-reveal-delay-4">
+        <div class="lp-feat-icon lp-feat-icon--amber">🌐</div>
+        <div class="lp-feat-body">
+          <h4>Community & Challenges</h4>
+          <p>Join groups, participate in accountability challenges, and submit proof. Discipline is stronger together.</p>
+          <span class="lp-feat-tag">Community</span>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ══ IDENTITY SECTION ══ -->
+<section style="background:#080814;padding:0 0 0 0;">
+  <div class="lp-identity">
+    <div class="lp-identity-img lp-reveal">
+      <img src="/img/cosmos_1720778025.jpeg" alt="Identity progression" onerror="this.style.background='rgba(139,92,246,.1)'">
+      <div class="lp-identity-levels">
+        <span class="lp-id-level">Lost</span>
+        <span class="lp-id-level">Explorer</span>
+        <span class="lp-id-level active">Builder</span>
+        <span class="lp-id-level">Disciplined</span>
+        <span class="lp-id-level">Focused</span>
+        <span class="lp-id-level">Elite</span>
+      </div>
+    </div>
+    <div class="lp-identity-content lp-reveal lp-reveal-delay-2">
+      <span class="lp-section-label">Identity Progression</span>
+      <h2 class="lp-section-title">Your habits become<br>your identity.</h2>
+      <p class="lp-section-sub">
+        Anaida Space tracks more than streaks. Your Identity Score compounds every week — turning daily discipline into a measurable transformation.
+      </p>
+      <div class="lp-identity-stat">
+        <div class="lp-id-stat-row">
+          <span class="lp-id-stat-label">Streak Bonus</span>
+          <div class="lp-id-stat-bar"><div class="lp-id-stat-fill" style="width:72%"></div></div>
+          <span class="lp-id-stat-val">72</span>
+        </div>
+        <div class="lp-id-stat-row">
+          <span class="lp-id-stat-label">Habit Rate</span>
+          <div class="lp-id-stat-bar"><div class="lp-id-stat-fill" style="width:88%"></div></div>
+          <span class="lp-id-stat-val">88</span>
+        </div>
+        <div class="lp-id-stat-row">
+          <span class="lp-id-stat-label">Weekly Reviews</span>
+          <div class="lp-id-stat-bar"><div class="lp-id-stat-fill" style="width:55%"></div></div>
+          <span class="lp-id-stat-val">55</span>
+        </div>
+        <div class="lp-id-stat-row">
+          <span class="lp-id-stat-label">Programs Done</span>
+          <div class="lp-id-stat-bar"><div class="lp-id-stat-fill" style="width:40%"></div></div>
+          <span class="lp-id-stat-val">40</span>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ══ CTA BAND ══ -->
+<section class="lp-cta-band">
+  <div class="lp-cta-band-bg"></div>
+  <div class="lp-cta-band-overlay"></div>
+  <div class="lp-cta-band-content lp-reveal">
+    <span class="lp-section-label" style="color:rgba(196,181,253,.7)">Begin Today</span>
+    <h2>Begin your transformation.</h2>
+    <p>Stop waiting to feel ready. The discipline you want begins with a single committed action — right now.</p>
+    <a href="registration.html" class="btn-primary" style="font-size:1rem;padding:16px 36px;">
+      Create Your Account
+      <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M5 12h14M12 5l7 7-7 7"/></svg>
+    </a>
+  </div>
+</section>
+
+<!-- ══ FOOTER ══ -->
+<footer class="lp-footer">
+  <div class="lp-footer-inner">
+    <div>
+      <div class="lp-footer-brand">ANAIDA SPACE</div>
+      <p class="lp-footer-tagline">A digital sanctuary for self-development, habit-building, and identity progression.</p>
+    </div>
+    <div class="lp-footer-links">
+      <div class="lp-footer-col">
+        <h5>Platform</h5>
+        <a href="index.html">Home</a>
+        <a href="#how-it-works">How It Works</a>
+        <a href="#features">Features</a>
+        <a href="registration.html">Register</a>
+      </div>
+      <div class="lp-footer-col">
+        <h5>Tools</h5>
+        <a href="test.html" target="_blank" rel="noopener noreferrer">Self-Test</a>
+        <a href="dashboard.html">Dashboard</a>
+        <a href="journey.html">Journey</a>
+        <a href="plan.html">Plan</a>
+      </div>
+      <div class="lp-footer-col">
+        <h5>Community</h5>
+        <a href="#">Instagram</a>
+        <a href="#">YouTube</a>
+        <a href="#">Threads</a>
+        <a href="#">Email</a>
+      </div>
+    </div>
+  </div>
+  <div class="lp-footer-bottom">
+    <span class="lp-footer-copy">©2025 Anaida Space · All rights reserved</span>
+    <span class="lp-footer-copy" style="color:rgba(255,255,255,.18);">Break the circle.</span>
+  </div>
+</footer>
+
+<!-- Hidden elements kept for JS compatibility (quiz modal etc.) -->
+<div class="pomo-modal full-screen" id="quizModal" style="display:none;">
+  <div class="quiz-card">
+    <button id="closeQuiz" style="position:absolute;top:30px;right:30px;background:none;border:none;color:white;font-size:2.5rem;cursor:pointer;z-index:10;">&times;</button>
+    <div id="quizContent" style="width:100%;max-width:600px;padding:20px;"></div>
+  </div>
+</div>
+
+<script>
+  // Nav scroll effect
+  const lpNav = document.getElementById('lpNav');
+  window.addEventListener('scroll', () => {
+    lpNav.classList.toggle('scrolled', window.scrollY > 40);
+  }, { passive: true });
+
+  // Section reveal on scroll
+  const lpReveals = document.querySelectorAll('.lp-reveal');
+  const revealObs = new IntersectionObserver((entries) => {
+    entries.forEach(e => { if (e.isIntersecting) { e.target.classList.add('visible'); revealObs.unobserve(e.target); } });
+  }, { threshold: 0.12 });
+  lpReveals.forEach(el => revealObs.observe(el));
+
+  // Subtle hero parallax
+  const heroBg = document.getElementById('lpHeroBg');
+  window.addEventListener('scroll', () => {
+    const y = window.scrollY;
+    if (heroBg) heroBg.style.transform = `scale(1.08) translateY(${y * 0.18}px)`;
+  }, { passive: true });
+</script>
+
+<script type="module" src="js/app.js"></script>
+</body>
+</html>

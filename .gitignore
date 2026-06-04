@@ -1,0 +1,22 @@
+backend/.env
+
+# Virtual environment
+.venv/
+venv/
+
+# Python cache
+__pycache__/
+*.pyc
+*.pyo
+
+# Environment file
+.env
+
+# Build / packaging artefacts
+*.egg-info/
+
+# Test cache
+.pytest_cache/
+
+# Generated symlink / junction created by dev.py at runtime
+frontend/site/img/
