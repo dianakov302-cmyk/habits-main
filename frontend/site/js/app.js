@@ -4,7 +4,7 @@ import { initChat } from './modules/chat.js';
 import { initChallenges } from './modules/challenges.js';
 import { initAbout } from './modules/about.js';
 import { initQuiz } from './modules/test.js';
-import { initRegistration } from './modules/registration.js?v=4';
+import { initRegistration } from './modules/registration.js';
 import { initGoalSelection } from './modules/goal_service.js';
 import { initMotivation } from './modules/motivation.js';
 import { initParallax } from './modules/parallax.js';
@@ -81,6 +81,7 @@ if (page === 'home') {
 }
 
 if (page === 'test') {
+  console.log('✓ App: Initializing test page');
   initQuiz();
 }
 
@@ -89,6 +90,7 @@ if (page === 'plan') {
 }
 
 if (page === 'registration') {
+  console.log('✓ App: Initializing registration page');
   initAuth();        // Keep avatar consistent on auth page
   initRegistration();
 }

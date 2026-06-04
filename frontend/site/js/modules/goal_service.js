@@ -1,4 +1,4 @@
-import { apiRequest, USER_EMAIL_KEY } from './api.js?v=2';
+import { apiRequest, USER_EMAIL_KEY } from './api.js';
 
 /* Static fallback goals — shown if the API is unavailable */
 const FALLBACK_GOALS = [

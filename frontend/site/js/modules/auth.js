@@ -1,4 +1,4 @@
-import { apiRequest, USER_EMAIL_KEY, getToken, setToken, removeToken, isAuthenticated } from './api.js?v=2';
+import { apiRequest, USER_EMAIL_KEY, getToken, setToken, removeToken, isAuthenticated } from './api.js';
 
 /* ── State ── */
 let _currentUser = null; // { email }

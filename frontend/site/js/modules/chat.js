@@ -1,5 +1,5 @@
 import { escapeHtml } from './utils.js';
-import { apiRequest } from './api.js?v=2';
+import { apiRequest } from './api.js';
 
 /* ─────────────────────────────────────────────
    My People — Groups + simulated chat

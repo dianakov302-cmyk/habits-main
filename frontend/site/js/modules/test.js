@@ -3,7 +3,7 @@ import {
   generateRoadmap,
   saveRoadmapSession,
 } from './roadmap_engine.js';
-import { apiRequest, USER_EMAIL_KEY } from './api.js?v=2';
+import { apiRequest, USER_EMAIL_KEY } from './api.js';
 
 const QUIZ_SESSION_KEY = 'anaida_quiz_session_id';
 
@@ -36,7 +36,12 @@ async function saveQuizResultToDatabase({ answers, profile, roadmap }) {
 
 export function initQuiz() {
   const quizContent = document.getElementById('quizContent');
-  if (!quizContent) return;
+  if (!quizContent) {
+    console.error('✗ Quiz: #quizContent element not found!');
+    return;
+  }
+
+  console.log('✓ Quiz: Initializing...');
 
   const selectedGoal = localStorage.getItem('anaida_user_goal');
 
@@ -94,6 +99,8 @@ const QUESTIONS = [
 
   function renderQuestion() {
     const q = QUESTIONS[currentQ];
+
+    console.log(`Quiz: Rendering question ${currentQ + 1}/${QUESTIONS.length}`);
 
     quizContent.innerHTML = `
       ${selectedGoal ? `<p class="quiz-intro">Selected goal: <strong>${selectedGoal}</strong></p>` : ''}
@@ -174,5 +181,7 @@ const QUESTIONS = [
     };
   }
 
-  renderQuestion();
-}
+   renderQuestion();
+ }
+
+ console.log('✓ Quiz: Fully initialized. Rendering first question...');

@@ -31,6 +31,8 @@ export async function apiRequest(path, options = {}) {
   const normalizedPath = path.startsWith('/') ? path : `/${path}`;
   const url = `${getApiBaseUrl()}${normalizedPath}`;
 
+  console.log(`API Request: ${options.method || 'GET'} ${url}`);
+
   const token = getToken();
   const headers = { 'Content-Type': 'application/json' };
   if (token) headers['Authorization'] = `Bearer ${token}`;
@@ -41,6 +43,8 @@ export async function apiRequest(path, options = {}) {
     ...options,
     headers,
   });
+
+  console.log(`API Response: ${response.status} from ${url}`);
 
   // Handle 401: only redirect if we actually sent a token (user was supposed to be authenticated)
   // Don't redirect on public pages that make unauthenticated requests

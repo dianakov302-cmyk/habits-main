@@ -1,4 +1,5 @@
 import { getStoredRoadmapSession, renderRoadmap } from './roadmap_engine.js';
+import { isAuthenticated } from './api.js';
 
 export function initPlanPage() {
   const container = document.getElementById('planContent');
@@ -20,8 +21,15 @@ export function initPlanPage() {
   }
 
   if (continueBtn) {
-    continueBtn.addEventListener('click', () => {
-      window.location.href = 'registration.html?from=plan';
-    });
+    if (isAuthenticated()) {
+      continueBtn.textContent = 'Go to Dashboard';
+      continueBtn.addEventListener('click', () => {
+        window.location.href = 'dashboard.html';
+      });
+    } else {
+      continueBtn.addEventListener('click', () => {
+        window.location.href = 'registration.html?from=plan';
+      });
+    }
   }
 }

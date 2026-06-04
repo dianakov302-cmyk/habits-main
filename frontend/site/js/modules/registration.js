@@ -1,4 +1,5 @@
-import { apiRequest, USER_EMAIL_KEY, setToken } from './api.js?v=2';
+import { apiRequest, USER_EMAIL_KEY, setToken, isAuthenticated } from './api.js';
+
 
 function setMessage(element, message, isError = false) {
   if (!element) return;
@@ -87,16 +88,24 @@ function initRegisterForm() {
         }
         accessToken = loginData.access_token;
         userEmail = loginData.email || email;
-      }
+       }
+       if (!accessToken) {
+         throw new Error('Registration succeeded, but access token was not received.');
+       }
+       setToken(accessToken);
+       localStorage.setItem(USER_EMAIL_KEY, userEmail);
 
-      setToken(accessToken);
-      localStorage.setItem(USER_EMAIL_KEY, userEmail);
+       console.log('✓ Registration successful!');
+       console.log('✓ Token stored:', accessToken.substring(0, 20) + '...');
+       console.log('✓ Email stored:', userEmail);
+       console.log('→ Redirecting to test.html...');
 
-      setMessage(messageEl, 'Registration successful! Opening the test...');
-      window.location.href = 'test.html';
-    } catch (error) {
-      setMessage(messageEl, error.message || 'Registration failed.', true);
-    }
+       setMessage(messageEl, 'Registration successful! Opening the test...');
+       window.location.href = 'test.html';
+     } catch (error) {
+       console.error('✗ Registration error:', error);
+       setMessage(messageEl, error.message || 'Registration failed.', true);
+     }
   });
 }
 
@@ -142,6 +151,10 @@ function initLoginForm() {
 }
 
 export function initRegistration() {
+  if (isAuthenticated()) {
+    window.location.href = 'dashboard.html';
+    return;
+  }
   initTabs();
   initRegisterForm();
   initLoginForm();
