@@ -13,7 +13,7 @@ function initTabs() {
   const panelLogin = document.getElementById('panelLogin');
 
   if (!tabRegister || !tabLogin || !panelRegister || !panelLogin) {
-    return { setActiveTab: () => {} };
+    return;
   }
 
   function setActiveTab(mode) {
@@ -33,11 +33,9 @@ function initTabs() {
 
   const params = new URLSearchParams(window.location.search);
   setActiveTab(params.get('tab') === 'login' ? 'login' : 'register');
-
-  return { setActiveTab };
 }
 
-function initRegisterForm({ setActiveTab }) {
+function initRegisterForm() {
   const form = document.getElementById('registrationForm');
   const messageEl = document.getElementById('registrationMessage');
   if (!form) return;
@@ -74,30 +72,15 @@ function initRegisterForm({ setActiveTab }) {
       localStorage.setItem(
         'anaida_registration',
         JSON.stringify({ name, email, registeredAt: new Date().toISOString() }),
-              );
-              setToken(data.access_token);
-                localStorage.setItem(USER_EMAIL_KEY, data.email || email);
+      );
+      setToken(data.access_token);
+      localStorage.setItem(USER_EMAIL_KEY, data.email || email);
 
-                setMessage(messageEl, 'Registration successful! Welcome.');
+      setMessage(messageEl, 'Registration successful! Redirecting to the test...');
 
-                setTimeout(() => {
-                  window.location.href = 'dashboard.html';
-                }, 400);
-
-
-        setToken(loginData.access_token);
-        localStorage.setItem(USER_EMAIL_KEY, loginData.email || email);
-
-        setMessage(messageEl, 'Registration successful! Welcome.');
-
-        setTimeout(() => {
-          window.location.href = 'dashboard.html';
-        }, 400);
-        setMessage(messageEl, 'Registration successful! Welcome.');
-
-        setTimeout(() => {
-            window.location.href = 'dashboard.html';
-    }, 400);
+      setTimeout(() => {
+        window.location.href = 'test.html';
+      }, 400);
     } catch (error) {
       setMessage(messageEl, error.message || 'Registration failed.', true);
     }
@@ -131,11 +114,10 @@ function initLoginForm() {
         throw new Error(data?.message || 'Login failed.');
       }
 
-      // Store JWT token and email
       setToken(data.access_token);
       localStorage.setItem(USER_EMAIL_KEY, data.email || email);
 
-      setMessage(messageEl, data.message || 'Login successful.');
+      setMessage(messageEl, 'Login successful! Redirecting...');
 
       setTimeout(() => {
         window.location.href = 'dashboard.html';
@@ -146,9 +128,8 @@ function initLoginForm() {
   });
 }
 
-
 export function initRegistration() {
-  const tabs = initTabs();
-  initRegisterForm(tabs);
+  initTabs();
+  initRegisterForm();
   initLoginForm();
 }

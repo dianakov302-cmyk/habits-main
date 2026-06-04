@@ -4,7 +4,7 @@ import { initChat } from './modules/chat.js';
 import { initChallenges } from './modules/challenges.js';
 import { initAbout } from './modules/about.js';
 import { initQuiz } from './modules/test.js';
-import { initRegistration } from './modules/registration.js';
+import { initRegistration } from './modules/registration.js?v=4';
 import { initGoalSelection } from './modules/goal_service.js';
 import { initMotivation } from './modules/motivation.js';
 import { initParallax } from './modules/parallax.js';
