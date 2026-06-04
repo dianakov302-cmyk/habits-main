@@ -96,42 +96,38 @@
       display: flex;
       align-items: center;
       overflow: hidden;
-    }
-    .lp-hero-bg {
-      position: absolute;
-      inset: 0;
-      background-image: url('/img/cosmos_1779123708.jpeg');
-      background-size: cover;
-      background-position: center 30%;
-      transform: scale(1.08);
-      transition: transform 12s ease;
-    }
-    .lp-hero-bg::after {
-      content: '';
-      position: absolute;
-      inset: 0;
-      background: rgba(8,8,20,0.60);
+      background: #080814;
     }
     .lp-hero-gradient {
       position: absolute;
       inset: 0;
       background:
-        radial-gradient(ellipse at 10% 50%, rgba(139,92,246,.18) 0%, transparent 55%),
-        radial-gradient(ellipse at 90% 80%, rgba(16,185,129,.10) 0%, transparent 45%),
-        linear-gradient(to bottom, transparent 60%, rgba(8,8,20,.9) 100%);
+        radial-gradient(ellipse at 12% 45%, rgba(139,92,246,.14) 0%, transparent 50%),
+        radial-gradient(ellipse at 85% 70%, rgba(16,185,129,.08) 0%, transparent 45%);
       z-index: 1;
       pointer-events: none;
     }
-    .lp-hero-person {
+    .lp-hero-photo {
       position: absolute;
-      right: 5%;
+      right: 0;
       bottom: 0;
-      height: 95%;
-      max-height: 860px;
-      object-fit: contain;
-      object-position: bottom;
+      height: 100%;
+      width: min(52vw, 620px);
+      object-fit: cover;
+      object-position: center 15%;
       z-index: 2;
-      filter: drop-shadow(0 0 60px rgba(139,92,246,.18));
+      -webkit-mask-image: linear-gradient(to bottom, #000 0%, #000 62%, transparent 100%);
+      mask-image: linear-gradient(to bottom, #000 0%, #000 62%, transparent 100%);
+    }
+    .lp-hero-fade {
+      position: absolute;
+      left: 0;
+      right: 0;
+      bottom: 0;
+      height: 42%;
+      background: linear-gradient(to bottom, transparent 0%, rgba(8,8,20,.55) 45%, #080814 100%);
+      z-index: 3;
+      pointer-events: none;
     }
     .lp-hero-content {
       position: relative;
@@ -257,7 +253,12 @@
 
     @media (max-width: 700px) {
       .lp-hero-content { padding: 0 22px; margin-top: 60px; }
-      .lp-hero-person { height: 55%; right: 0; opacity: .5; }
+      .lp-hero-photo {
+        width: 100%;
+        height: 58%;
+        object-position: center 20%;
+        opacity: .45;
+      }
       .lp-hero-title { font-size: clamp(2.5rem, 10vw, 3.8rem); }
     }
 
@@ -384,18 +385,47 @@
     /* ══ FEATURES ══ */
     .lp-features {
       padding: 120px 48px;
-      background:
-        radial-gradient(ellipse at 70% 0%, rgba(139,92,246,.1) 0%, transparent 55%),
-        radial-gradient(ellipse at 20% 100%, rgba(16,185,129,.07) 0%, transparent 50%),
-        #08091a;
+      background: #080814;
       position: relative;
+      overflow: hidden;
     }
     .lp-features::before {
       content: '';
       position: absolute;
+      top: 50%;
+      right: clamp(24px, 8vw, 96px);
+      transform: translateY(-50%);
+      width: 325px;
+      height: 488px;
+      max-width: calc(100% - 48px);
+      background: url('/img/cosmos_840327049.jpeg') no-repeat center;
+      background-size: contain;
+      opacity: 0.25;
+      pointer-events: none;
+      z-index: 0;
+    }
+    .lp-features::after {
+      content: '';
+      position: absolute;
+      inset: 0;
+      background:
+        linear-gradient(to bottom, rgba(8,8,20,.55) 0%, rgba(8,8,20,.82) 100%),
+        radial-gradient(ellipse at 70% 0%, rgba(139,92,246,.1) 0%, transparent 55%),
+        radial-gradient(ellipse at 20% 100%, rgba(16,185,129,.06) 0%, transparent 50%);
+      pointer-events: none;
+      z-index: 1;
+    }
+    .lp-features > div {
+      position: relative;
+      z-index: 2;
+    }
+    .lp-features-divider {
+      position: absolute;
       top: 0; left: 0; right: 0;
       height: 1px;
-      background: linear-gradient(to right, transparent, rgba(16,185,129,.25), rgba(139,92,246,.2), transparent);
+      background: linear-gradient(to right, transparent, rgba(139,92,246,.25), rgba(16,185,129,.2), transparent);
+      z-index: 3;
+      pointer-events: none;
     }
     .lp-features-grid {
       display: grid;
@@ -463,6 +493,12 @@
     @media (max-width: 900px) {
       .lp-features-grid { grid-template-columns: 1fr; }
       .lp-features { padding: 80px 24px; }
+      .lp-features::before {
+        width: 220px;
+        height: 330px;
+        right: 12px;
+        opacity: 0.18;
+      }
     }
 
     /* ══ IDENTITY BANNER ══ */
@@ -565,29 +601,11 @@
 
     /* ══ CTA BAND ══ */
     .lp-cta-band {
-      position: relative;
       padding: 120px 48px;
       text-align: center;
-      overflow: hidden;
-    }
-    .lp-cta-band-bg {
-      position: absolute;
-      inset: 0;
-      background-image: url('/img/cosmos_316863339.jpeg');
-      background-size: cover;
-      background-position: center;
-      filter: brightness(.35) saturate(.7);
-    }
-    .lp-cta-band-overlay {
-      position: absolute;
-      inset: 0;
-      background:
-        radial-gradient(ellipse at 50% 50%, rgba(139,92,246,.18) 0%, transparent 65%),
-        rgba(8,8,20,.5);
+      background: #080814;
     }
     .lp-cta-band-content {
-      position: relative;
-      z-index: 2;
       max-width: 620px;
       margin: 0 auto;
     }
@@ -724,14 +742,14 @@
 
 <!-- ══ HERO SECTION ══ -->
 <section class="lp-hero" id="hero">
-  <div class="lp-hero-bg" id="lpHeroBg"></div>
   <div class="lp-hero-gradient"></div>
   <img
-    src="/img/wmremove-transformed.png"
+    src="/img/cosmos_1882143318.jpeg"
     alt="Anaida Space — Build Your Identity"
-    class="lp-hero-person"
+    class="lp-hero-photo"
     onerror="this.style.display='none'"
   >
+  <div class="lp-hero-fade" aria-hidden="true"></div>
   <div class="lp-hero-content">
     <span class="lp-hero-kicker">Build Discipline. Become Elite.</span>
     <h1 class="lp-hero-title">
@@ -791,6 +809,7 @@
 
 <!-- ══ FEATURES ══ -->
 <section class="lp-features" id="features">
+  <div class="lp-features-divider" aria-hidden="true"></div>
   <div style="max-width:1100px;margin:0 auto;">
     <span class="lp-section-label lp-reveal">Features</span>
     <h2 class="lp-section-title lp-reveal lp-reveal-delay-1">Everything you need.<br>Nothing you don't.</h2>
@@ -836,7 +855,7 @@
 <section style="background:#080814;padding:0 0 0 0;">
   <div class="lp-identity">
     <div class="lp-identity-img lp-reveal">
-      <img src="/img/cosmos_1720778025.jpeg" alt="Identity progression" onerror="this.style.background='rgba(139,92,246,.1)'">
+      <img src="/img/cosmos_1779123708.jpeg" alt="Identity progression" onerror="this.style.background='rgba(139,92,246,.1)'">
       <div class="lp-identity-levels">
         <span class="lp-id-level">Lost</span>
         <span class="lp-id-level">Explorer</span>
@@ -880,8 +899,6 @@
 
 <!-- ══ CTA BAND ══ -->
 <section class="lp-cta-band">
-  <div class="lp-cta-band-bg"></div>
-  <div class="lp-cta-band-overlay"></div>
   <div class="lp-cta-band-content lp-reveal">
     <span class="lp-section-label" style="color:rgba(196,181,253,.7)">Begin Today</span>
     <h2>Begin your transformation.</h2>
@@ -952,12 +969,6 @@
   }, { threshold: 0.12 });
   lpReveals.forEach(el => revealObs.observe(el));
 
-  // Subtle hero parallax
-  const heroBg = document.getElementById('lpHeroBg');
-  window.addEventListener('scroll', () => {
-    const y = window.scrollY;
-    if (heroBg) heroBg.style.transform = `scale(1.08) translateY(${y * 0.18}px)`;
-  }, { passive: true });
 </script>
 
 <script type="module" src="js/app.js"></script>
