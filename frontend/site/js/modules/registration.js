@@ -73,14 +73,27 @@ function initRegisterForm() {
         'anaida_registration',
         JSON.stringify({ name, email, registeredAt: new Date().toISOString() }),
       );
-      setToken(data.access_token);
-      localStorage.setItem(USER_EMAIL_KEY, data.email || email);
 
-      setMessage(messageEl, 'Registration successful! Redirecting to the test...');
+      let accessToken = data.access_token;
+      let userEmail = data.email || email;
 
-      setTimeout(() => {
-        window.location.href = 'test.html';
-      }, 400);
+      if (!accessToken) {
+        const loginData = await apiRequest('/users/login', {
+          method: 'POST',
+          body: JSON.stringify({ email, password }),
+        });
+        if (loginData?.status !== 'success') {
+          throw new Error(loginData?.message || 'Auto login failed after registration.');
+        }
+        accessToken = loginData.access_token;
+        userEmail = loginData.email || email;
+      }
+
+      setToken(accessToken);
+      localStorage.setItem(USER_EMAIL_KEY, userEmail);
+
+      setMessage(messageEl, 'Registration successful! Opening the test...');
+      window.location.href = 'test.html';
     } catch (error) {
       setMessage(messageEl, error.message || 'Registration failed.', true);
     }
