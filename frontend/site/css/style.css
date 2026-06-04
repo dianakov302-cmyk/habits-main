@@ -258,11 +258,8 @@ html,body{height:100%}
   background:rgba(8,12,28,.72);backdrop-filter:blur(2px);
 }
 .quiz-card>*{position:relative;z-index:1;}
-.quiz-title{
-  font-family:'Playfair Display',serif;font-style:italic;
-  font-size:2.2rem;color:var(--white);margin-bottom:22px;
-  text-align:center;
-}
+/* ════════ GOAL TEST TITLE TEXTURE ════════ */
+
 .quiz-intro{
   color:rgba(255,255,255,.7);font-size:.88rem;
   margin-bottom:16px;font-family:'Outfit',sans-serif;
@@ -2024,4 +2021,41 @@ html { scroll-behavior: smooth; }
 .auth-submit:hover {
   transform: translateY(-2px);
   box-shadow: 0 8px 32px rgba(139,92,246,.5);
+}
+/* ════════ GOAL TEST TITLE TEXTURE ════════ */
+
+.quiz-title{
+  position: relative !important;
+  display: block;
+  margin-bottom: 34px !important;
+  font-family: 'Playfair Display', serif !important;
+  font-size: clamp(2.4rem, 6vw, 4.8rem) !important;
+  font-weight: 700 !important;
+  font-style: italic !important;
+  letter-spacing: 1px;
+  text-align: center !important;
+
+  color: transparent !important;
+  background: linear-gradient(135deg, #ffffff 0%, #c4b5fd 35%, #8b5cf6 65%, #38bdf8 100%) !important;
+  -webkit-background-clip: text !important;
+  background-clip: text !important;
+  -webkit-text-fill-color: transparent !important;
+
+  text-shadow:
+    0 0 18px rgba(139, 92, 246, .45),
+    0 0 36px rgba(56, 189, 248, .25);
+
+  filter: drop-shadow(0 8px 18px rgba(0,0,0,.55));
+}
+
+.quiz-title::after{
+  content: '';
+  position: absolute;
+  left: 50%;
+  bottom: -12px;
+  width: 120px;
+  height: 2px;
+  transform: translateX(-50%);
+  background: linear-gradient(90deg, transparent, #8b5cf6, #38bdf8, transparent);
+  box-shadow: 0 0 18px rgba(139,92,246,.7);
 }

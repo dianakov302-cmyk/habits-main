@@ -1,4 +1,5 @@
 import { apiRequest, USER_EMAIL_KEY, isAuthenticated, removeToken } from './api.js';
+import { getStoredRoadmapSession } from './roadmap_engine.js';
 
 // ── State ──
 let email = null;
@@ -134,20 +135,50 @@ async function loadIdentity() {
   try {
     const res = await apiRequest(`/identity/profile?email=${encodeURIComponent(email)}`);
     const d = res.data || {};
-    set('identityLevel', d.level || 'Lost');
-    set('identityMsg', d.message || '');
-    const score = d.score ?? 0;
+
+    const roadmapSession = getStoredRoadmapSession();
+
+    const displayLevel =
+      roadmapSession?.profile?.archetypeLabel ||
+      d.level ||
+      d.identity_level ||
+      'Explorer';
+    const score = d.score ?? d.identity_score ?? 0;
+
+    set('identityLevel', displayLevel);
+
+    set(
+      'identityMsg',
+      archetypeDescriptions[displayLevel] ||
+      d.message ||
+      'Build momentum through small daily actions.'
+);
+
     const bar = document.getElementById('identityBar');
     if (bar) bar.style.width = `${Math.min(100, score)}%`;
-    set('identityNext', d.next_level
-      ? `Next: ${d.next_level} — ${100 - score > 0 ? Math.round(100 - score) : 0} pts away`
-      : 'Maximum level reached');
-    set('statStreak', d.current_streak ?? '—');
-    set('statPoints', d.today_points ?? '—');
+
+    const nextMessage = {
+          Powerhouse: 'Focus on sustainability and avoiding burnout.',
+          Builder: 'Focus on consistency and gradual improvement.',
+          Explorer: 'Focus on clarity and building momentum.',
+    };
+
+    set(
+      'identityNext',
+      nextMessage[displayLevel] || ''
+    );
+
+    set('statStreak', `${d.current_streak ?? 0} days`);
+    set('statPoints', d.today_points ?? 0);
   } catch (_) {
-    set('identityLevel', 'Lost');
-    set('identityMsg', 'Start tracking habits to build your identity score.');
-    set('identityNext', '');
+    set('identityLevel', 'Starting Point');
+    set(
+      'identityMsg',
+      'Start with one small action today to build your identity score.'
+    );
+    set('identityNext', 'Next level: Explorer');
+    set('statStreak', '0 days');
+    set('statPoints', 0);
   }
 }
 
