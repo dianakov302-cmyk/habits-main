@@ -167,7 +167,7 @@ const QUESTIONS = [
     const toPlanBtn = document.getElementById('toPlan');
     if (toPlanBtn) {
       toPlanBtn.onclick = () => {
-        window.location.href = 'plan.html';
+        window.location.href = 'dashboard.html?tab=program';
       };
     }
 

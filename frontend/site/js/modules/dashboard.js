@@ -1,5 +1,6 @@
 import { apiRequest, USER_EMAIL_KEY, isAuthenticated, removeToken } from './api.js';
 import { getStoredRoadmapSession } from './roadmap_engine.js';
+import { initPomodoro } from './pomodoro.js';
 
 // ── State ──
 let email = null;
@@ -40,6 +41,7 @@ document.addEventListener('DOMContentLoaded', async () => {
   localStorage.setItem(USER_EMAIL_KEY, email);
 
   updateNavUser();
+  initPomodoro();
   await loadOverview();
   loadRewardCatalog();
 });
@@ -76,9 +78,17 @@ function updateNavUser() {
 // ── Tab navigation ──
 function initTabs() {
   const tabs = document.querySelectorAll('.dash-tab');
+
   tabs.forEach(tab => {
     tab.addEventListener('click', () => switchPanel(tab.dataset.panel));
   });
+
+  const params = new URLSearchParams(window.location.search);
+  const tab = params.get('tab');
+
+  if (tab) {
+    switchPanel(tab);
+  }
 }
 
 window.switchPanel = function switchPanel(name) {
@@ -96,8 +106,10 @@ async function onPanelActivate(name) {
   if (name === 'protocol') await loadProtocol();
   if (name === 'program')  await loadProgram();
   if (name === 'review')   await loadReview();
-  if (name === 'productivity') { await loadWater(); await loadPlanner(); }
-  if (name === 'study')    { await loadSRQueue(); await loadBrainstorm(); }
+  if (name === 'pomodoro') initPomodoro();
+  if (name === 'water-tracker') await loadWater();
+  if (name === 'space-repetition') { await loadSRQueue(); await loadBrainstorm(); }
+  if (name === 'productivity') await loadPlanner();
   if (name === 'rewards')  await loadUserRewards();
   if (name === 'chat')     await loadConversations();
 }
@@ -187,8 +199,10 @@ async function loadProtocolSummary() {
     const res = await apiRequest(`/protocol/today?email=${encodeURIComponent(email)}`);
     const c = document.getElementById('protocolSummaryContent');
     if (!c) return;
-    if (!res.data) { c.innerHTML = '<div class="empty">No protocol set for today. Go to Protocol tab to create one.</div>'; return; }
-    const d = res.data;
+    if (!res.data) {
+      c.innerHTML = buildRecommendationsHtml();
+  return;
+}
     c.innerHTML = buildTaskRowHtml('minimum', d.minimum_task, false) +
       buildTaskRowHtml('target', d.target_task, false) +
       buildTaskRowHtml('bonus', d.bonus_task, false);
@@ -602,7 +616,7 @@ document.getElementById('plannerAddBtn')?.addEventListener('click', async () => 
 // ════════════════════════════════════════════════
 async function loadSRQueue() {
   try {
-    const res = await apiRequest(`/productivity/sr/review?email=${encodeURIComponent(email)}`);
+    const res = await apiRequest('/productivity/sr/review');
     srQueue = res.data || [];
     set('srDueCount', srQueue.length ? `${srQueue.length} due` : '');
     set('statCards', srQueue.length);
@@ -619,6 +633,7 @@ function showNextSRCard() {
     hideEl('srReviewMode');
     if (empty) empty.style.display = 'block';
     if (done) done.style.display = 'none';
+    set('srDueCount', '');
     return;
   }
 
@@ -644,11 +659,16 @@ document.querySelectorAll('.ease-btn').forEach(btn => {
   btn.addEventListener('click', async () => {
     if (!srCurrentCard) return;
     const ease = parseInt(btn.dataset.ease, 10);
+    const cardId = srCurrentCard._id || srCurrentCard.id;
     try {
-      await apiRequest(`/productivity/sr/cards/${srCurrentCard._id || srCurrentCard.id}/review`, {
+      const res = await apiRequest(`/productivity/sr/cards/${cardId}/review`, {
         method: 'POST',
         body: JSON.stringify({ ease }),
       });
+      if (res.status !== 'success') {
+        status('srStatus', res.message || 'Review failed.', 'err');
+        return;
+      }
       srQueue.shift();
       set('srDueCount', srQueue.length ? `${srQueue.length} due` : '');
       set('statCards', srQueue.length);
@@ -685,7 +705,7 @@ document.getElementById('srAddBtn')?.addEventListener('click', async () => {
 // ════════════════════════════════════════════════
 async function loadBrainstorm() {
   try {
-    const res = await apiRequest(`/productivity/brainstorm?email=${encodeURIComponent(email)}`);
+    const res = await apiRequest('/productivity/brainstorm');
     brainstormSessions = res.data || [];
     renderBrainstormList(brainstormSessions);
   } catch (_) { brainstormSessions = []; renderBrainstormList([]); }
@@ -695,6 +715,7 @@ function renderBrainstormList(sessions) {
   const list = document.getElementById('brainstormList');
   if (!list) return;
   hideEl('brainstormActive');
+  showEl('brainstormList');
   if (!sessions.length) { list.innerHTML = '<div class="empty">No sessions yet.</div>'; return; }
   list.innerHTML = sessions.map(s => {
     const sid = s._id || s.id || '';
@@ -745,7 +766,7 @@ document.getElementById('brainstormAddIdeaBtn')?.addEventListener('click', async
       document.getElementById('brainstormIdeaInput').value = '';
       status('brainstormIdeaStatus', '✓ Idea added.', 'ok');
       // Re-fetch sessions and refresh view with updated ideas
-      const fetch = await apiRequest(`/productivity/brainstorm?email=${encodeURIComponent(email)}`);
+      const fetch = await apiRequest('/productivity/brainstorm');
       brainstormSessions = fetch.data || [];
       const session = brainstormSessions.find(s => (s._id || s.id) === activeBrainstormId);
       renderBrainstormIdeas(session?.ideas || []);
@@ -948,7 +969,73 @@ window.startDM = async function(recipient) {
     }
   } catch (e) { status('chatStatus', e.message, 'err'); }
 };
+function buildRecommendationsHtml() {
+  const { roadmap } = getStoredRoadmapSession();
 
+  const program = roadmap?.program;
+
+  if (!program) {
+    return `
+      <div class="empty">
+        Complete the test to receive personalized recommendations.
+      </div>
+    `;
+  }
+
+  const book = program.books?.[0];
+  const video = program.videos?.[0];
+  const action = program.days?.[0];
+
+  return `
+    <div style="text-align:left">
+
+      <div style="margin-bottom:14px;">
+        <div style="font-size:.75rem;color:var(--muted);margin-bottom:4px;">
+          📖 READ
+        </div>
+        <div style="font-weight:600;">
+          ${book?.title || 'No recommendation'}
+        </div>
+      </div>
+
+      <div style="margin-bottom:14px;">
+        <div style="font-size:.75rem;color:var(--muted);margin-bottom:4px;">
+          🎥 WATCH
+        </div>
+        <div style="font-weight:600;">
+          ${video?.title || 'No recommendation'}
+        </div>
+      </div>
+
+      <div>
+        <div style="font-size:.75rem;color:var(--muted);margin-bottom:4px;">
+          🎯 TODAY'S ACTION
+        </div>
+        <div style="font-weight:600;">
+          ${action?.task || 'No action available'}
+        </div>
+      </div>
+
+    </div>
+  `;
+}
+// Mood picker
+let selectedMood = null;
+
+document.querySelectorAll('.mood-btn').forEach(btn => {
+    btn.addEventListener('click', () => {
+
+        document.querySelectorAll('.mood-btn')
+            .forEach(b => b.classList.remove('active'));
+
+        btn.classList.add('active');
+
+        selectedMood = btn.dataset.mood;
+
+        document.getElementById('selectedMoodText').textContent =
+            `Selected: ${btn.textContent}`;
+    });
+});
 // ════════════════════════════════════════════════
 //  Tiny DOM helpers
 // ════════════════════════════════════════════════

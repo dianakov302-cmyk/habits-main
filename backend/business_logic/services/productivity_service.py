@@ -175,12 +175,17 @@ class ProductivityService(IProductivityService):
         try:
             if ease not in (1, 2, 3, 4):
                 return {"status": "error", "message": "ease must be 1 (again), 2 (hard), 3 (good), or 4 (easy)"}
-            cards = self.productivity_repository.find_sr_cards("")
-            card = next((c for c in cards if c["_id"] == card_id), None)
+            find_by_id = getattr(self.productivity_repository, 'find_sr_card_by_id', None)
+            if find_by_id:
+                card = find_by_id(card_id)
+            else:
+                card = next(
+                    (c for c in self.productivity_repository.find_sr_cards("")
+                     if c.get("_id") == card_id),
+                    None,
+                )
             if card is None:
-                # direct lookup fallback
-                all_cards = self.productivity_repository.find_sr_cards("")
-                card = next((c for c in all_cards if c.get("_id") == card_id), None)
+                return {"status": "error", "message": "Card not found."}
 
             ef = 2.5
             interval = 1

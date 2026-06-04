@@ -85,6 +85,21 @@ class ProductivityRepository:
             d["_id"] = str(d["_id"])
         return docs
 
+    def find_sr_card_by_id(self, card_id: str):
+        try:
+            oid = ObjectId(card_id)
+        except InvalidId:
+            return None
+        doc = self.sr_cards.find_one(
+            {"_id": oid},
+            {"_id": 1, "email": 1, "deck": 1, "front": 1, "back": 1,
+             "ease_factor": 1, "interval_days": 1, "repetitions": 1, "next_review_date": 1},
+        )
+        if not doc:
+            return None
+        doc["_id"] = str(doc["_id"])
+        return doc
+
     def insert_sr_card(self, data: dict) -> str:
         result = self.sr_cards.insert_one(data)
         return str(result.inserted_id)

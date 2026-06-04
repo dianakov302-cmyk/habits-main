@@ -357,6 +357,92 @@
     /* ── Empty state ── */
     .empty { text-align: center; padding: 32px; color: var(--muted); font-size: .88rem; }
 
+    /* ── Features Grid ── */
+    .features-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+      gap: 16px;
+      margin-top: 20px;
+    }
+    @media(max-width: 700px) {
+      .features-grid {
+        grid-template-columns: repeat(2, 1fr);
+      }
+    }
+
+    /* ── Feature Block ── */
+    .feature-block {
+      background: rgba(30,41,59,.65);
+      backdrop-filter: blur(16px);
+      border: 1px solid rgba(255,255,255,.08);
+      border-radius: var(--radius-card);
+      padding: 24px;
+      text-align: center;
+      cursor: pointer;
+      transition: all .3s ease;
+      box-shadow: var(--shadow);
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 12px;
+    }
+    .feature-block:hover {
+      border-color: var(--violet);
+      background: rgba(139,92,246,.08);
+      transform: translateY(-4px);
+      box-shadow: 0 12px 40px rgba(139,92,246,.2);
+    }
+    .feature-icon {
+      font-size: 2.4rem;
+      line-height: 1;
+    }
+    .feature-name {
+      font-size: 1rem;
+      font-weight: 600;
+      color: var(--white);
+    }
+    .feature-desc {
+      font-size: .78rem;
+      color: var(--muted);
+    }
+
+    /* ── Spotify Embed ── */
+    .spotify-embed-container {
+      border-radius: 12px;
+      overflow: hidden;
+      margin-top: 16px;
+    }
+    .spotify-embed-container iframe {
+      border-radius: 12px;
+    }
+
+    /* ── Modal ── */
+    .modal.open {
+      display: flex !important;
+    }
+
+    /* ── Pomodoro Settings Button ── */
+    .btn-settings {
+      background: rgba(139,92,246,.1);
+      border: 1px solid rgba(139,92,246,.3);
+      color: #c4b5fd;
+      padding: 8px 14px;
+      border-radius: 8px;
+      font-size: .8rem;
+      font-weight: 600;
+      cursor: pointer;
+      transition: all .25s;
+      font-family: 'Outfit', sans-serif;
+      white-space: nowrap;
+    }
+    .btn-settings:hover {
+      background: rgba(139,92,246,.25);
+      border-color: var(--violet);
+    }
+    .btn-settings:active {
+      background: rgba(139,92,246,.3);
+    }
+
     /* ── Scrollbar ── */
     ::-webkit-scrollbar { width: 5px; }
     ::-webkit-scrollbar-track { background: transparent; }
@@ -370,11 +456,10 @@
   <span class="dash-logo">Anaida Space</span>
   <div class="dash-tabs" id="dashTabs">
     <button class="dash-tab active" data-panel="overview">Overview</button>
+    <button class="dash-tab" data-panel="features">Features</button>
     <button class="dash-tab" data-panel="protocol">Protocol</button>
     <button class="dash-tab" data-panel="program">Program</button>
     <button class="dash-tab" data-panel="review">Review</button>
-    <button class="dash-tab" data-panel="productivity">Productivity</button>
-    <button class="dash-tab" data-panel="study">Study</button>
     <button class="dash-tab" data-panel="rewards">Rewards</button>
     <button class="dash-tab" data-panel="chat">Chat</button>
   </div>
@@ -444,14 +529,260 @@
 
       <!-- Today's protocol summary -->
       <div class="card" id="protocolSummary">
-        <div class="card-title">Today's Protocol</div>
+        <div class="card-title">Today's Recommendations</div>
         <div id="protocolSummaryContent"><div class="empty">No protocol set for today. Go to Protocol tab to create one.</div></div>
         <button class="btn btn-secondary btn-sm" style="margin-top:14px" onclick="switchPanel('protocol')">Open Protocol →</button>
       </div>
     </div>
   </div>
 
-  <!-- ══ DAILY PROTOCOL ══ -->
+  <!-- ══ FEATURES ══ -->
+  <div class="dash-panel" id="panel-features">
+    <div class="section-header">
+      <h1>Features</h1>
+      <p>Quick access to your most-used productivity tools. Click any block to open it.</p>
+    </div>
+
+    <div class="features-grid">
+      <div class="feature-block" onclick="switchPanel('pomodoro')">
+        <div class="feature-icon">🍅</div>
+        <div class="feature-name">Pomodoro</div>
+        <div class="feature-desc">Time your focus sessions</div>
+      </div>
+
+      <!-- Water Tracker Feature -->
+      <div class="feature-block" onclick="switchPanel('water-tracker')">
+        <div class="feature-icon">💧</div>
+        <div class="feature-name">Water Tracker</div>
+        <div class="feature-desc">Log daily hydration</div>
+      </div>
+
+      <!-- Spaced Repetition Feature -->
+      <div class="feature-block" onclick="switchPanel('space-repetition')">
+        <div class="feature-icon">🧠</div>
+        <div class="feature-name">Space Repetition</div>
+        <div class="feature-desc">Learn and retain</div>
+      </div>
+
+      <!-- Vibes Feature -->
+      <div class="feature-block" onclick="switchPanel('vibes')">
+        <div class="feature-icon">🎵</div>
+        <div class="feature-name">Vibes</div>
+        <div class="feature-desc">Chill with music</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ══ VIBES ══ -->
+  <div class="dash-panel" id="panel-vibes">
+    <div class="section-header">
+      <h1>Vibes</h1>
+      <p>Focus, relax, and vibe with curated music.</p>
+    </div>
+
+    <div class="card">
+      <div class="card-title">Spotify Playlist</div>
+      <div class="spotify-embed-container">
+        <iframe data-testid="embed-iframe" style="border-radius:12px" src="https://open.spotify.com/embed/playlist/6VnbVX1b2iuvXEolHpoXIH?utm_source=generator&theme=0" width="100%" height="352" frameBorder="0" allowfullscreen="" allow="autoplay; clipboard-write; encrypted-media; fullscreen; picture-in-picture" loading="lazy"></iframe>
+      </div>
+    </div>
+  </div>
+
+  <!-- ══ POMODORO ══ -->
+  <div class="dash-panel" id="panel-pomodoro">
+    <div class="section-header">
+      <h1>Pomodoro Timer</h1>
+      <p>Time your focus sessions with focused work and mindful breaks.</p>
+    </div>
+
+    <div class="card">
+      <div class="card-title">Focus Session</div>
+      <div class="pomodoro-session">
+
+        <div class="pomodoro-ring-wrap">
+          <svg class="pomodoro-ring-svg" viewBox="0 0 100 100" aria-hidden="true">
+            <defs>
+              <linearGradient id="pomGrad" x1="0%" y1="0%" x2="100%" y2="100%">
+                <stop offset="0%" style="stop-color:#8b5cf6;stop-opacity:1" />
+                <stop offset="100%" style="stop-color:#7c3aed;stop-opacity:1" />
+              </linearGradient>
+            </defs>
+            <circle cx="50" cy="50" r="45" fill="none" stroke="rgba(255,255,255,.1)" stroke-width="2" />
+            <circle id="pomCircleProgress" cx="50" cy="50" r="45" fill="none" stroke="url(#pomGrad)"
+              stroke-width="3" stroke-dasharray="282.7" stroke-dashoffset="0" stroke-linecap="round"
+              transform="rotate(-90 50 50)" />
+          </svg>
+          <div class="pomodoro-ring-core">
+            <div id="pomodoroAnimal" class="pom-fox breathing" aria-hidden="true">
+              <div class="pom-fox-ear pom-fox-ear-l"></div>
+              <div class="pom-fox-ear pom-fox-ear-r"></div>
+              <div class="pom-fox-face">
+                <div class="pom-fox-eye pom-fox-eye-l"></div>
+                <div class="pom-fox-eye pom-fox-eye-r"></div>
+                <div class="pom-fox-snout"></div>
+              </div>
+              <div class="pom-fox-tail"></div>
+              <div class="pom-fox-zzz" aria-hidden="true">z</div>
+            </div>
+            <div id="timerDisplay" class="pomodoro-timer-digits">25:00</div>
+            <div id="pomodoroState" class="pomodoro-phase-label">FOCUS</div>
+          </div>
+        </div>
+
+        <div class="pomodoro-actions">
+          <button class="btn btn-sm" id="startBtn" style="min-width: 100px;">▶ Start</button>
+          <button class="btn btn-secondary btn-sm" id="resetBtn" style="min-width: 100px;">⟲ Reset</button>
+        </div>
+
+        <div class="pomodoro-settings-row">
+          <button class="btn-settings" id="changeTimeBtn" type="button" title="Set focus time">Focus: <span id="focusMinDisplay">25</span> min</button>
+          <button class="btn-settings" id="changeBreakBtn" type="button" title="Set break time">Break: <span id="breakMinDisplay">5</span> min</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- Time modal -->
+    <div id="timeModal" style="display: none; position: fixed; top: 0; left: 0; right: 0; bottom: 0; background: rgba(0,0,0,.6); z-index: 1000; align-items: center; justify-content: center;" class="modal">
+      <div style="background: rgba(30,41,59,.95); backdrop-filter: blur(16px); border: 1px solid rgba(255,255,255,.1); border-radius: 20px; padding: 32px; max-width: 320px; box-shadow: 0 20px 60px rgba(0,0,0,.4);">
+        <div class="field-label" id="modalTitle" style="margin-bottom: 20px; text-align: center; font-size: 1.1rem; color: var(--white); font-weight: 600;">Set Time</div>
+        <input class="field" id="modalInput" type="number" min="1" max="180" value="25" style="margin-bottom: 20px; text-align: center; font-size: 1.2rem; padding: 12px;">
+        <div style="display: flex; gap: 10px;">
+          <button class="btn btn-secondary btn-sm" id="modalCancel" style="flex: 1; padding: 10px;">Cancel</button>
+          <button class="btn btn-sm" id="modalConfirm" style="flex: 1; padding: 10px;">Confirm</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ══ WATER TRACKER ══ -->
+  <div class="dash-panel" id="panel-water-tracker">
+    <div class="section-header">
+      <h1>Water Tracker</h1>
+      <p>Stay hydrated. Track your daily water intake.</p>
+    </div>
+
+    <div class="card">
+      <div class="card-title">Water Tracker</div>
+      <div style="display:flex;align-items:baseline;gap:8px">
+        <div class="water-count" id="waterCount">0</div>
+        <div class="water-goal">/ <span id="waterGoal">8</span> glasses</div>
+      </div>
+      <div class="water-glasses" id="waterGlasses"></div>
+      <div class="prog-wrap">
+        <div class="prog-track"><div class="prog-fill" id="waterBar" style="width:0%;background:linear-gradient(90deg,#3b82f6,#60a5fa)"></div></div>
+      </div>
+      <button class="btn btn-sm" id="logWaterBtn" style="margin-top:14px">+ Log a Glass (250ml)</button>
+      <div class="status-msg" id="waterStatus"></div>
+    </div>
+  </div>
+
+  <!-- ══ SPACE REPETITION ══ -->
+  <div class="dash-panel" id="panel-space-repetition">
+    <div class="section-header">
+      <h1>Spaced Repetition</h1>
+      <p>Learn and retain with active recall.</p>
+    </div>
+
+    <div class="grid-2" style="align-items:start">
+      <!-- Spaced repetition -->
+      <div class="card">
+        <div class="card-title">Spaced Repetition  <span id="srDueCount" style="margin-left:auto;font-size:.8rem;color:var(--violet);font-weight:700"></span></div>
+
+        <!-- Review mode -->
+        <div id="srReviewMode" style="display:none">
+          <div class="sr-card-face" id="srCardFace" title="Tap to reveal answer">Tap to reveal…</div>
+          <div id="srAnswerWrap" style="display:none">
+            <div class="sr-card-face" id="srCardBack" style="margin-top:10px;border-color:rgba(16,185,129,.25)"></div>
+            <div class="sr-ease-btns">
+              <button class="ease-btn ease-1" data-ease="1">Again</button>
+              <button class="ease-btn ease-2" data-ease="2">Hard</button>
+              <button class="ease-btn ease-3" data-ease="3">Good</button>
+              <button class="ease-btn ease-4" data-ease="4">Easy</button>
+            </div>
+          </div>
+          <div class="status-msg" id="srStatus"></div>
+        </div>
+        <div id="srDoneState" style="display:none;text-align:center;padding:24px 0;">
+          <div style="font-size:1.4rem">🎉</div>
+          <div style="font-size:.9rem;color:var(--muted);margin-top:8px">All due cards reviewed.</div>
+        </div>
+        <div id="srEmptyState">
+          <div class="empty">No cards due. Add some below.</div>
+        </div>
+
+        <!-- Add card form -->
+        <div style="margin-top:20px;border-top:1px solid rgba(255,255,255,.07);padding-top:16px">
+          <div class="field-label">Add a new card</div>
+          <input class="field" id="srDeck" placeholder="Deck name (e.g. Spanish)" style="margin-bottom:8px">
+          <input class="field" id="srFront" placeholder="Front (question or term)" style="margin-bottom:8px">
+          <input class="field" id="srBack" placeholder="Back (answer or definition)" style="margin-bottom:8px">
+          <button class="btn btn-sm" id="srAddBtn">Add Card</button>
+          <div class="status-msg" id="srAddStatus"></div>
+        </div>
+      </div>
+
+      <!-- Brainstorm -->
+      <div class="card">
+        <div class="card-title">Brainstorm</div>
+
+        <!-- Session list -->
+        <div id="brainstormList" style="margin-bottom:14px"><div class="empty">No sessions yet.</div></div>
+
+        <!-- Active session -->
+        <div id="brainstormActive" style="display:none">
+          <div style="display:flex;align-items:center;gap:10px;margin-bottom:14px">
+            <div style="font-weight:600;font-size:.95rem" id="brainstormTitle"></div>
+            <button class="btn btn-secondary btn-sm" id="brainstormBackBtn">← All Sessions</button>
+          </div>
+          <div id="brainstormIdeas"></div>
+          <div class="field-row" style="margin-top:10px">
+            <input class="field" id="brainstormIdeaInput" placeholder="New idea…" style="flex:1">
+            <button class="btn btn-sm" id="brainstormAddIdeaBtn">Add</button>
+          </div>
+          <div class="status-msg" id="brainstormIdeaStatus"></div>
+        </div>
+
+        <!-- New session form -->
+        <div style="border-top:1px solid rgba(255,255,255,.07);padding-top:14px;margin-top:4px">
+          <div class="field-row">
+            <input class="field" id="brainstormNewTitle" placeholder="New session title…" style="flex:1">
+            <button class="btn btn-sm" id="brainstormCreateBtn">Create</button>
+          </div>
+          <div class="status-msg" id="brainstormStatus"></div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ══ PRODUCTIVITY (Planner only) ══ -->
+  <div class="dash-panel" id="panel-productivity">
+    <div class="section-header">
+      <h1>Daily Planner</h1>
+      <p>Organize your day with a simple task list.</p>
+    </div>
+
+    <div class="card">
+      <div class="card-title">Today's Planner</div>
+      <div id="plannerList"><div class="empty">No tasks yet.</div></div>
+      <div style="margin-top:14px;display:flex;flex-direction:column;gap:8px">
+        <input class="field" id="plannerTitle" placeholder="Task title…" />
+        <div class="field-row">
+          <select class="field" id="plannerPriority" style="flex:1">
+            <option value="high">High</option>
+            <option value="medium" selected>Medium</option>
+            <option value="low">Low</option>
+          </select>
+          <input class="field" id="plannerSlot" placeholder="Time (e.g. 09:00–10:00)" style="flex:2">
+        </div>
+        <button class="btn btn-sm" id="plannerAddBtn">Add Task</button>
+        <div class="status-msg" id="plannerStatus"></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ══ STUDY (keeping for compatibility, hidden from tabs) ══ -->
+  <div class="dash-panel" id="panel-study" style="display: none;">
+  </div>
   <div class="dash-panel" id="panel-protocol">
     <div class="section-header">
       <h1>Daily Protocol</h1>
@@ -602,6 +933,19 @@
         <div class="review-q">
           <label class="field-label">What will you change next week?</label>
           <textarea class="field" id="reviewChange" placeholder="One specific action you'll take differently…"></textarea>
+          <div class="mood-section">
+    <p class="mood-title">How are you feeling today?</p>
+
+          <div class="mood-picker">
+              <button class="mood-btn" data-mood="1">😢</button>
+              <button class="mood-btn" data-mood="2">🙁</button>
+              <button class="mood-btn" data-mood="3">😐</button>
+              <button class="mood-btn" data-mood="4">🙂</button>
+              <button class="mood-btn" data-mood="5">😁</button>
+          </div>
+
+          <p id="selectedMoodText">No mood selected</p>
+      </div>
         </div>
         <button class="btn" id="reviewSubmitBtn">Submit Review</button>
         <div class="status-msg" id="reviewStatus"></div>
@@ -618,128 +962,6 @@
         <div class="card" style="margin-top:20px" id="reviewHistoryCard">
           <div class="card-title">Past Reviews</div>
           <div id="reviewHistoryList"><div class="empty">No reviews yet.</div></div>
-        </div>
-      </div>
-    </div>
-  </div>
-
-  <!-- ══ PRODUCTIVITY ══ -->
-  <div class="dash-panel" id="panel-productivity">
-    <div class="section-header">
-      <h1>Productivity</h1>
-      <p>Water tracker and daily planner.</p>
-    </div>
-
-    <div class="grid-2" style="align-items:start">
-      <!-- Water tracker -->
-      <div class="card">
-        <div class="card-title">Water Tracker</div>
-        <div style="display:flex;align-items:baseline;gap:8px">
-          <div class="water-count" id="waterCount">0</div>
-          <div class="water-goal">/ <span id="waterGoal">8</span> glasses</div>
-        </div>
-        <div class="water-glasses" id="waterGlasses"></div>
-        <div class="prog-wrap">
-          <div class="prog-track"><div class="prog-fill" id="waterBar" style="width:0%;background:linear-gradient(90deg,#3b82f6,#60a5fa)"></div></div>
-        </div>
-        <button class="btn btn-sm" id="logWaterBtn" style="margin-top:14px">+ Log a Glass (250ml)</button>
-        <div class="status-msg" id="waterStatus"></div>
-      </div>
-
-      <!-- Planner -->
-      <div class="card">
-        <div class="card-title">Today's Planner</div>
-        <div id="plannerList"><div class="empty">No tasks yet.</div></div>
-        <div style="margin-top:14px;display:flex;flex-direction:column;gap:8px">
-          <input class="field" id="plannerTitle" placeholder="Task title…" />
-          <div class="field-row">
-            <select class="field" id="plannerPriority" style="flex:1">
-              <option value="high">High</option>
-              <option value="medium" selected>Medium</option>
-              <option value="low">Low</option>
-            </select>
-            <input class="field" id="plannerSlot" placeholder="Time (e.g. 09:00–10:00)" style="flex:2">
-          </div>
-          <button class="btn btn-sm" id="plannerAddBtn">Add Task</button>
-          <div class="status-msg" id="plannerStatus"></div>
-        </div>
-      </div>
-    </div>
-  </div>
-
-  <!-- ══ STUDY ══ -->
-  <div class="dash-panel" id="panel-study">
-    <div class="section-header">
-      <h1>Study Tools</h1>
-      <p>Spaced repetition and brainstorm board.</p>
-    </div>
-
-    <div class="grid-2" style="align-items:start">
-      <!-- Spaced repetition -->
-      <div class="card">
-        <div class="card-title">Spaced Repetition  <span id="srDueCount" style="margin-left:auto;font-size:.8rem;color:var(--violet);font-weight:700"></span></div>
-
-        <!-- Review mode -->
-        <div id="srReviewMode" style="display:none">
-          <div class="sr-card-face" id="srCardFace" title="Tap to reveal answer">Tap to reveal…</div>
-          <div id="srAnswerWrap" style="display:none">
-            <div class="sr-card-face" id="srCardBack" style="margin-top:10px;border-color:rgba(16,185,129,.25)"></div>
-            <div class="sr-ease-btns">
-              <button class="ease-btn ease-1" data-ease="1">Again</button>
-              <button class="ease-btn ease-2" data-ease="2">Hard</button>
-              <button class="ease-btn ease-3" data-ease="3">Good</button>
-              <button class="ease-btn ease-4" data-ease="4">Easy</button>
-            </div>
-          </div>
-          <div class="status-msg" id="srStatus"></div>
-        </div>
-        <div id="srDoneState" style="display:none;text-align:center;padding:24px 0;">
-          <div style="font-size:1.4rem">🎉</div>
-          <div style="font-size:.9rem;color:var(--muted);margin-top:8px">All due cards reviewed.</div>
-        </div>
-        <div id="srEmptyState">
-          <div class="empty">No cards due. Add some below.</div>
-        </div>
-
-        <!-- Add card form -->
-        <div style="margin-top:20px;border-top:1px solid rgba(255,255,255,.07);padding-top:16px">
-          <div class="field-label">Add a new card</div>
-          <input class="field" id="srDeck" placeholder="Deck name (e.g. Spanish)" style="margin-bottom:8px">
-          <input class="field" id="srFront" placeholder="Front (question or term)" style="margin-bottom:8px">
-          <input class="field" id="srBack" placeholder="Back (answer or definition)" style="margin-bottom:8px">
-          <button class="btn btn-sm" id="srAddBtn">Add Card</button>
-          <div class="status-msg" id="srAddStatus"></div>
-        </div>
-      </div>
-
-      <!-- Brainstorm -->
-      <div class="card">
-        <div class="card-title">Brainstorm</div>
-
-        <!-- Session list -->
-        <div id="brainstormList" style="margin-bottom:14px"><div class="empty">No sessions yet.</div></div>
-
-        <!-- Active session -->
-        <div id="brainstormActive" style="display:none">
-          <div style="display:flex;align-items:center;gap:10px;margin-bottom:14px">
-            <div style="font-weight:600;font-size:.95rem" id="brainstormTitle"></div>
-            <button class="btn btn-secondary btn-sm" id="brainstormBackBtn">← All Sessions</button>
-          </div>
-          <div id="brainstormIdeas"></div>
-          <div class="field-row" style="margin-top:10px">
-            <input class="field" id="brainstormIdeaInput" placeholder="New idea…" style="flex:1">
-            <button class="btn btn-sm" id="brainstormAddIdeaBtn">Add</button>
-          </div>
-          <div class="status-msg" id="brainstormIdeaStatus"></div>
-        </div>
-
-        <!-- New session form -->
-        <div style="border-top:1px solid rgba(255,255,255,.07);padding-top:14px;margin-top:4px">
-          <div class="field-row">
-            <input class="field" id="brainstormNewTitle" placeholder="New session title…" style="flex:1">
-            <button class="btn btn-sm" id="brainstormCreateBtn">Create</button>
-          </div>
-          <div class="status-msg" id="brainstormStatus"></div>
         </div>
       </div>
     </div>
@@ -796,6 +1018,7 @@
         <div class="chat-conv-list" id="convList"><div class="empty">No conversations yet.</div></div>
       </div>
 
+
       <!-- Message thread -->
       <div class="card" id="chatThreadCard" style="display:none">
         <div style="display:flex;align-items:center;gap:10px;margin-bottom:14px">
@@ -817,6 +1040,7 @@
   </div>
 
 </main>
+
 
 <script type="module" src="js/modules/dashboard.js"></script>
 </body>
