@@ -1,3 +1,5 @@
+import './article-tab.js';
+
 const DEFAULT_API_BASE_URL = 'http://localhost:8080';
 
 export const USER_EMAIL_KEY = 'anaida_user_email';
