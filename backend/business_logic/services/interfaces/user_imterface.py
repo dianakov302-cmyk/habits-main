@@ -25,6 +25,9 @@ class IUserService(ABC):
         email: str,
         new_email: str | None = None,
         new_password: str | None = None,
+        name: str | None = None,
+        avatar_url: str | None = None,
+        overview: str | None = None,
     ) -> dict[str, Any]:
         pass
 

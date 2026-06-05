@@ -12,7 +12,7 @@ class IChatService(ABC):
         pass
 
     @abstractmethod
-    def get_messages(self, conversation_id: str) -> dict[str, Any]:
+    def get_messages(self, conversation_id: str, sender_email: str | None = None) -> dict[str, Any]:
         pass
 
     @abstractmethod

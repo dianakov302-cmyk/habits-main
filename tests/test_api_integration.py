@@ -463,5 +463,38 @@ class TestPublicEndpoints(unittest.TestCase):
         self.assertIn("docs", resp.json())
 
 
+class TestCorsPreflight(unittest.TestCase):
+    def setUp(self):
+        self.client = TestClient(app, raise_server_exceptions=False)
+
+    def test_chat_preflight_allows_default_frontend_origin(self):
+        resp = self.client.options(
+            "/chat/conversations",
+            headers={
+                "Origin": "http://127.0.0.1:3000",
+                "Access-Control-Request-Method": "GET",
+            },
+        )
+        self.assertEqual(resp.status_code, 200)
+        self.assertEqual(
+            resp.headers.get("access-control-allow-origin"),
+            "http://127.0.0.1:3000",
+        )
+
+    def test_chat_preflight_allows_alternate_localhost_port(self):
+        resp = self.client.options(
+            "/chat/conversations",
+            headers={
+                "Origin": "http://localhost:3001",
+                "Access-Control-Request-Method": "GET",
+            },
+        )
+        self.assertEqual(resp.status_code, 200)
+        self.assertEqual(
+            resp.headers.get("access-control-allow-origin"),
+            "http://localhost:3001",
+        )
+
+
 if __name__ == "__main__":
     unittest.main()

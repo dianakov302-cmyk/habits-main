@@ -93,13 +93,27 @@ class UserService(IUserService):
         except Exception as e:
             return {"status": "error", "message": f"Failed to fetch profile: {str(e)}"}
 
-    def update_user_profile(self, email: str, new_email: str = None, new_password: str = None):
+    def update_user_profile(
+        self,
+        email: str,
+        new_email: str = None,
+        new_password: str = None,
+        name: str | None = None,
+        avatar_url: str | None = None,
+        overview: str | None = None,
+    ):
         try:
             update_fields = {}
             if new_email:
                 update_fields["email"] = new_email
             if new_password:
                 update_fields["password"] = bcrypt.hashpw(new_password.encode(), bcrypt.gensalt()).decode()
+            if name is not None:
+                update_fields["name"] = name.strip()
+            if avatar_url is not None:
+                update_fields["avatar_url"] = avatar_url
+            if overview is not None:
+                update_fields["overview"] = overview.strip()
             if not update_fields:
                 return {"status": "error", "message": "No updates provided."}
             result = self.user_repository.collection.update_one(

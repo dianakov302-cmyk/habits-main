@@ -1,4 +1,5 @@
 import { apiRequest, USER_EMAIL_KEY, isAuthenticated, removeToken } from './api.js';
+import { initArticleTab } from './article-tab.js';
 import { getStoredRoadmapSession } from './roadmap_engine.js';
 import { initPomodoro } from './pomodoro.js';
 
@@ -12,6 +13,11 @@ let brainstormSessions = [];
 let currentConvId = null;
 let rewardCatalogData = [];
 let userUnlocked = [];
+let userProfile = { name: '', overview: '', avatar_url: '' };
+let pendingAvatarUrl = null;
+let currentConvType = 'dm';
+const AI_COACH_EMAIL = 'coach@anaida.space';
+const AI_COACH_TITLE = 'AI Coach';
 
 // ── Auth verification ──
 async function verifyAuth() {
@@ -31,6 +37,7 @@ async function verifyAuth() {
 
 // ── Bootstrap ──
 document.addEventListener('DOMContentLoaded', async () => {
+  initArticleTab();
   initTabs();
 
   const verifiedEmail = await verifyAuth();
@@ -41,7 +48,9 @@ document.addEventListener('DOMContentLoaded', async () => {
   localStorage.setItem(USER_EMAIL_KEY, email);
 
   updateNavUser();
+  initProfileForm();
   initPomodoro();
+  await loadUserProfile();
   await loadOverview();
   loadRewardCatalog();
 });
@@ -54,33 +63,209 @@ function showAuthGate() {
   if (content) content.style.display = 'none';
 }
 
+function profileInitial() {
+  const source = userProfile.name?.trim() || email || '?';
+  return source[0].toUpperCase();
+}
+
+function renderAvatarElement(el, avatarUrl, fallbackLetter) {
+  if (!el) return;
+  el.innerHTML = '';
+  if (avatarUrl) {
+    const img = document.createElement('img');
+    img.src = avatarUrl;
+    img.alt = '';
+    el.appendChild(img);
+    return;
+  }
+  el.textContent = fallbackLetter;
+}
+
 function updateNavUser() {
   const el = document.getElementById('dashEmail');
   const av = document.getElementById('dashAvatar');
   if (!el || !av) return;
   if (email) {
-    el.textContent = email;
-    av.textContent = email[0].toUpperCase();
-    av.onclick = () => {
-      if (confirm(`Sign out of ${email}?`)) {
-        removeToken();
-        localStorage.removeItem(USER_EMAIL_KEY);
-        window.location.href = 'registration.html';
-      }
-    };
+    const displayName = userProfile.name?.trim();
+    el.textContent = displayName || email;
+    renderAvatarElement(av, userProfile.avatar_url, profileInitial());
+    av.title = 'Your profile';
   } else {
     el.textContent = '';
-    av.textContent = '?';
+    renderAvatarElement(av, null, '?');
     av.onclick = () => { window.location.href = 'registration.html'; };
+    av.title = 'Sign in';
   }
+}
+
+function renderProfileForm() {
+  const nameInput = document.getElementById('profileNameInput');
+  const overviewInput = document.getElementById('profileOverviewInput');
+  const emailHint = document.getElementById('profileEmailHint');
+  const removeBtn = document.getElementById('profilePhotoRemove');
+  const avatarDisplay = document.getElementById('profileAvatarDisplay');
+
+  if (nameInput) nameInput.value = userProfile.name || '';
+  if (overviewInput) overviewInput.value = userProfile.overview || '';
+  if (emailHint) emailHint.textContent = email ? email : '';
+
+  const avatar = pendingAvatarUrl !== null ? pendingAvatarUrl : userProfile.avatar_url;
+  renderAvatarElement(avatarDisplay, avatar, profileInitial());
+  if (removeBtn) removeBtn.style.display = avatar ? 'inline' : 'none';
+
+  updateNavUser();
+}
+
+async function loadUserProfile() {
+  try {
+    const res = await apiRequest('/users/profile');
+    const data = res.data || {};
+    userProfile = {
+      name: data.name || '',
+      overview: data.overview || '',
+      avatar_url: data.avatar_url || '',
+    };
+    pendingAvatarUrl = null;
+    renderProfileForm();
+  } catch (_) {
+    renderProfileForm();
+  }
+}
+
+function resizeImageToDataUrl(file, maxSize = 256) {
+  return new Promise((resolve, reject) => {
+    const reader = new FileReader();
+    reader.onerror = () => reject(new Error('Could not read image.'));
+    reader.onload = () => {
+      const img = new Image();
+      img.onerror = () => reject(new Error('Invalid image.'));
+      img.onload = () => {
+        let { width, height } = img;
+        const scale = Math.min(1, maxSize / Math.max(width, height));
+        width = Math.round(width * scale);
+        height = Math.round(height * scale);
+        const canvas = document.createElement('canvas');
+        canvas.width = width;
+        canvas.height = height;
+        const ctx = canvas.getContext('2d');
+        ctx.drawImage(img, 0, 0, width, height);
+        resolve(canvas.toDataURL('image/jpeg', 0.85));
+      };
+      img.src = reader.result;
+    };
+    reader.readAsDataURL(file);
+  });
+}
+
+function openProfileDrawer() {
+  document.getElementById('profileDrawerBackdrop')?.classList.add('open');
+  const drawer = document.getElementById('profileDrawer');
+  drawer?.classList.add('open');
+  drawer?.setAttribute('aria-hidden', 'false');
+  document.body.style.overflow = 'hidden';
+  renderProfileForm();
+}
+
+function closeProfileDrawer() {
+  document.getElementById('profileDrawerBackdrop')?.classList.remove('open');
+  const drawer = document.getElementById('profileDrawer');
+  drawer?.classList.remove('open');
+  drawer?.setAttribute('aria-hidden', 'true');
+  document.body.style.overflow = '';
+}
+
+function initProfileDrawer() {
+  const trigger = document.getElementById('dashUserTrigger');
+  trigger?.addEventListener('click', () => {
+    if (email) openProfileDrawer();
+    else window.location.href = 'registration.html';
+  });
+  document.getElementById('profileDrawerClose')?.addEventListener('click', closeProfileDrawer);
+  document.getElementById('profileDrawerBackdrop')?.addEventListener('click', closeProfileDrawer);
+  document.addEventListener('keydown', (e) => {
+    if (e.key === 'Escape') closeProfileDrawer();
+  });
+}
+
+function initProfileForm() {
+  initProfileDrawer();
+
+  const photoBtn = document.getElementById('profilePhotoBtn');
+  const photoInput = document.getElementById('profilePhotoInput');
+  const removeBtn = document.getElementById('profilePhotoRemove');
+  const saveBtn = document.getElementById('profileSaveBtn');
+  const signOutBtn = document.getElementById('profileSignOutBtn');
+
+  photoBtn?.addEventListener('click', () => photoInput?.click());
+
+  photoInput?.addEventListener('change', async () => {
+    const file = photoInput.files?.[0];
+    photoInput.value = '';
+    if (!file) return;
+    if (file.size > 5 * 1024 * 1024) {
+      status('profileSaveStatus', 'Image must be under 5 MB.', 'err');
+      return;
+    }
+    try {
+      pendingAvatarUrl = await resizeImageToDataUrl(file);
+      renderProfileForm();
+      status('profileSaveStatus', 'Photo ready — click Save profile.', 'ok');
+    } catch (e) {
+      status('profileSaveStatus', e.message || 'Could not process image.', 'err');
+    }
+  });
+
+  removeBtn?.addEventListener('click', () => {
+    pendingAvatarUrl = '';
+    renderProfileForm();
+    status('profileSaveStatus', 'Photo removed — click Save profile.', 'ok');
+  });
+
+  saveBtn?.addEventListener('click', async () => {
+    if (!email) return;
+    const name = document.getElementById('profileNameInput')?.value?.trim() ?? '';
+    const overview = document.getElementById('profileOverviewInput')?.value?.trim() ?? '';
+    const body = { name, overview };
+    if (pendingAvatarUrl !== null) body.avatar_url = pendingAvatarUrl;
+
+    saveBtn.disabled = true;
+    status('profileSaveStatus', 'Saving…', 'ok');
+    try {
+      const res = await apiRequest('/users/profile', {
+        method: 'PUT',
+        body: JSON.stringify(body),
+      });
+      if (res.status === 'success') {
+        if (pendingAvatarUrl !== null) userProfile.avatar_url = pendingAvatarUrl;
+        userProfile.name = name;
+        userProfile.overview = overview;
+        pendingAvatarUrl = null;
+        renderProfileForm();
+        status('profileSaveStatus', 'Profile saved.', 'ok');
+      } else {
+        status('profileSaveStatus', res.message || 'Save failed.', 'err');
+      }
+    } catch (e) {
+      status('profileSaveStatus', e.message || 'Save failed.', 'err');
+    } finally {
+      saveBtn.disabled = false;
+    }
+  });
+
+  signOutBtn?.addEventListener('click', () => {
+    if (!email || !confirm(`Sign out of ${email}?`)) return;
+    removeToken();
+    localStorage.removeItem(USER_EMAIL_KEY);
+    window.location.href = 'registration.html';
+  });
 }
 
 // ── Tab navigation ──
 function initTabs() {
-  const tabs = document.querySelectorAll('.dash-tab');
-
-  tabs.forEach(tab => {
-    tab.addEventListener('click', () => switchPanel(tab.dataset.panel));
+  const tabsRoot = document.getElementById('dashTabs');
+  tabsRoot?.addEventListener('click', (event) => {
+    const tab = event.target.closest('.dash-tab');
+    if (tab?.dataset.panel) switchPanel(tab.dataset.panel);
   });
 
   const params = new URLSearchParams(window.location.search);
@@ -105,6 +290,7 @@ async function onPanelActivate(name) {
   if (!email) return;
   if (name === 'protocol') await loadProtocol();
   if (name === 'program')  await loadProgram();
+  if (name === 'overview') await loadOverview();
   if (name === 'review')   await loadReview();
   if (name === 'pomodoro') initPomodoro();
   if (name === 'water-tracker') await loadWater();
@@ -122,6 +308,12 @@ function status(id, msg, type = 'ok') {
   el.textContent = msg;
   el.className = `status-msg ${type}`;
 }
+function formatMessageTime(value) {
+  if (!value) return '';
+  const date = new Date(value);
+  if (Number.isNaN(date.getTime())) return '';
+  return date.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
+}
 function greeting() {
   const h = new Date().getHours();
   if (h < 12) return 'Good morning.';
@@ -134,12 +326,24 @@ function greeting() {
 // ════════════════════════════════════════════════
 async function loadOverview() {
   const greet = document.getElementById('greetingText');
-  if (greet) greet.textContent = greeting();
+  const sub = document.getElementById('greetingSub');
+  const displayName = userProfile.name?.trim();
+  if (greet) {
+    greet.textContent = displayName
+      ? `${greeting().replace(/\.$/, '')}, ${displayName}.`
+      : greeting();
+  }
+  if (sub) {
+    sub.textContent = userProfile.overview?.trim()
+      ? userProfile.overview.trim()
+      : "Here's where you stand today.";
+  }
 
   await Promise.allSettled([
     loadIdentity(),
-    loadProtocolSummary(),
     loadDeloadAlert(),
+    loadWaterStat(),
+    loadCardsStat(),
   ]);
 }
 
@@ -194,20 +398,9 @@ async function loadIdentity() {
   }
 }
 
-async function loadProtocolSummary() {
-  try {
-    const res = await apiRequest(`/protocol/today?email=${encodeURIComponent(email)}`);
-    const c = document.getElementById('protocolSummaryContent');
-    if (!c) return;
-    if (!res.data) {
-      c.innerHTML = buildRecommendationsHtml();
-  return;
-}
-    c.innerHTML = buildTaskRowHtml('minimum', d.minimum_task, false) +
-      buildTaskRowHtml('target', d.target_task, false) +
-      buildTaskRowHtml('bonus', d.bonus_task, false);
-    set('statPoints', d.points_earned ?? '—');
-  } catch (_) {}
+function loadProgramRecommendations() {
+  const c = document.getElementById('programRecommendationsContent');
+  if (c) c.innerHTML = buildRecommendationsHtml();
 }
 
 async function loadDeloadAlert() {
@@ -374,6 +567,7 @@ document.getElementById('deloadCompleteBtn')?.addEventListener('click', async ()
 //  30-DAY PROGRAM
 // ════════════════════════════════════════════════
 async function loadProgram() {
+  loadProgramRecommendations();
   try {
     const res = await apiRequest(`/program/status?email=${encodeURIComponent(email)}`);
     if (res.data !== null && res.data !== undefined) {
@@ -868,27 +1062,52 @@ async function loadConversations() {
 function renderConvList(convs) {
   const list = document.getElementById('convList');
   if (!list) return;
-  if (!convs.length) { list.innerHTML = '<div class="empty">No conversations yet.</div>'; return; }
-  list.innerHTML = convs.map(c => {
+  const visible = (convs || []).filter(c => (c.type || 'dm') !== 'coach');
+  if (!visible.length) { list.innerHTML = '<div class="empty">No conversations yet.</div>'; return; }
+  list.innerHTML = visible.map(c => {
     const cid = c._id || c.id || '';
+    const type = c.type || 'dm';
     const other = c.participants?.find(p => p !== email) || c.title || 'User';
-    return `<div class="conv-item" onclick="openConversation('${cid}','${escAttr(other)}')">
+    const meta = type === 'challenge' ? 'Challenge thread' : 'Direct message';
+    return `<div class="conv-item" onclick="openConversation('${cid}','${escAttr(other)}','${escAttr(type)}')">
       <div class="conv-avatar">${(other[0] || '?').toUpperCase()}</div>
       <div class="conv-info">
         <div class="conv-name">${escHtml(other)}</div>
         <div class="conv-last">${escHtml(c.last_message || 'No messages yet')}</div>
+        <div class="conv-meta">${escHtml(meta)}</div>
       </div>
     </div>`;
   }).join('');
 }
 
-window.openConversation = async function(id, title) {
+window.openConversation = async function(id, title, type = 'dm') {
   currentConvId = id;
+  currentConvType = type || 'dm';
   set('chatThreadTitle', title);
+  const coachNote = document.getElementById('chatCoachNote');
+  const isCoach = currentConvType === 'coach';
+  if (coachNote) coachNote.style.display = isCoach ? 'flex' : 'none';
   showEl('chatThreadCard');
   hideEl('chatPlaceholderCard');
   await loadMessages(id);
+  if (isCoach) {
+    const promptButtons = document.querySelectorAll('.chat-quick-prompt');
+    promptButtons.forEach(btn => {
+      btn.onclick = () => {
+        const prompt = btn.dataset.prompt || '';
+        const input = document.getElementById('msgInput');
+        if (!prompt || !input) return;
+        input.value = prompt;
+        input.focus();
+      };
+    });
+  }
+  document.getElementById('msgInput')?.focus();
 };
+
+document.getElementById('coachThreadCard')?.addEventListener('click', () => {
+  window.openConversation('coach', AI_COACH_TITLE, 'coach');
+});
 
 async function loadMessages(id) {
   try {
@@ -903,9 +1122,10 @@ function renderMessages(msgs) {
   if (!msgs.length) { list.innerHTML = '<div class="empty" style="text-align:center;padding:20px">No messages yet.</div>'; return; }
   list.innerHTML = msgs.map(m => {
     const mine = m.sender_email === email;
-    return `<div class="msg ${mine ? 'mine' : 'theirs'}">
+    const isCoach = m.sender_email === AI_COACH_EMAIL;
+    return `<div class="msg ${mine ? 'mine' : 'theirs'} ${isCoach ? 'coach' : ''}">
       <div class="msg-bubble">${escHtml(m.content)}</div>
-      <div class="msg-time">${m.created_at ? new Date(m.created_at).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }) : ''}</div>
+      <div class="msg-time">${formatMessageTime(m.sent_at || m.created_at || m.createdAt)}</div>
     </div>`;
   }).join('');
   list.scrollTop = list.scrollHeight;
@@ -913,8 +1133,11 @@ function renderMessages(msgs) {
 
 document.getElementById('chatBackBtn')?.addEventListener('click', () => {
   currentConvId = null;
+  currentConvType = 'dm';
   hideEl('chatThreadCard');
   showEl('chatPlaceholderCard');
+  const coachNote = document.getElementById('chatCoachNote');
+  if (coachNote) coachNote.style.display = 'none';
 });
 
 document.getElementById('msgSendBtn')?.addEventListener('click', sendMessage);
@@ -971,15 +1194,10 @@ window.startDM = async function(recipient) {
 };
 function buildRecommendationsHtml() {
   const { roadmap } = getStoredRoadmapSession();
-
   const program = roadmap?.program;
 
   if (!program) {
-    return `
-      <div class="empty">
-        Complete the test to receive personalized recommendations.
-      </div>
-    `;
+    return '<div class="empty">Complete the test to receive personalized recommendations.</div>';
   }
 
   const book = program.books?.[0];
@@ -987,35 +1205,17 @@ function buildRecommendationsHtml() {
   const action = program.days?.[0];
 
   return `
-    <div style="text-align:left">
-
-      <div style="margin-bottom:14px;">
-        <div style="font-size:.75rem;color:var(--muted);margin-bottom:4px;">
-          📖 READ
-        </div>
-        <div style="font-weight:600;">
-          ${book?.title || 'No recommendation'}
-        </div>
-      </div>
-
-      <div style="margin-bottom:14px;">
-        <div style="font-size:.75rem;color:var(--muted);margin-bottom:4px;">
-          🎥 WATCH
-        </div>
-        <div style="font-weight:600;">
-          ${video?.title || 'No recommendation'}
-        </div>
-      </div>
-
-      <div>
-        <div style="font-size:.75rem;color:var(--muted);margin-bottom:4px;">
-          🎯 TODAY'S ACTION
-        </div>
-        <div style="font-weight:600;">
-          ${action?.task || 'No action available'}
-        </div>
-      </div>
-
+    <div class="program-rec-item">
+      <div class="program-rec-label">📖 READ</div>
+      <div class="program-rec-value">${escHtml(book?.title || 'No recommendation')}</div>
+    </div>
+    <div class="program-rec-item">
+      <div class="program-rec-label">🎥 WATCH</div>
+      <div class="program-rec-value">${escHtml(video?.title || 'No recommendation')}</div>
+    </div>
+    <div class="program-rec-item">
+      <div class="program-rec-label">🎯 TODAY'S ACTION</div>
+      <div class="program-rec-value">${escHtml(action?.task || 'No action available')}</div>
     </div>
   `;
 }

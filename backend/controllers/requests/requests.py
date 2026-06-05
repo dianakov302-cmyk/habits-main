@@ -18,6 +18,9 @@ class UserProfileUpdateRequest(BaseModel):
     email: str | None = Field(default=None, min_length=3, max_length=320)
     new_email: str | None = Field(default=None, min_length=3, max_length=320)
     new_password: str | None = Field(default=None, min_length=1)
+    name: str | None = Field(default=None, max_length=200)
+    avatar_url: str | None = Field(default=None, max_length=500_000)
+    overview: str | None = Field(default=None, max_length=2000)
 
 
 class UserQuizResultRequest(BaseModel):

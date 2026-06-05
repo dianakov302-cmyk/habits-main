@@ -24,7 +24,7 @@
    - [Community Groups (UC-080–UC-083)](#community-groups-uc-080uc-083)
    - [Challenges (UC-090–UC-098)](#challenges-uc-090uc-098)
    - [Rewards (UC-100–UC-104)](#rewards-uc-100uc-104)
-   - [Chat (UC-110–UC-115)](#chat-uc-110uc-115)
+   - [Chat (UC-110–UC-116)](#chat-uc-110uc-116)
    - [Productivity — Water (UC-120–UC-122)](#productivity--water-uc-120uc-122)
    - [Productivity — Planner (UC-123–UC-126)](#productivity--planner-uc-123uc-126)
    - [Productivity — Spaced Repetition (UC-127–UC-130)](#productivity--spaced-repetition-uc-127uc-130)
@@ -144,6 +144,7 @@ Anaida Space is a premium, psychologically intelligent self-development platform
 | UC-113 | Read Messages | Authenticated User | Should |
 | UC-114 | Search Users | Authenticated User | Should |
 | UC-115 | Group Conversation | Authenticated User | Could |
+| UC-116 | AI Coach Conversation | Authenticated User | Should |
 | UC-120 | Log Water Intake | Authenticated User | Could |
 | UC-121 | View Water Log | Authenticated User | Could |
 | UC-122 | Set Daily Water Goal | Authenticated User | Could |
@@ -1781,7 +1782,7 @@ Anaida Space is a premium, psychologically intelligent self-development platform
 
 ---
 
-### Chat (UC-110–UC-115)
+### Chat (UC-110–UC-116)
 
 ---
 
@@ -1921,6 +1922,38 @@ Anaida Space is a premium, psychologically intelligent self-development platform
 
 **Business Rules:**
 - Group conversations share the same `messages` collection and the same send / read mechanics as direct messages (UC-112, UC-113).
+
+#### UC-116: AI Coach Conversation
+
+**Actor(s):** Authenticated User  
+**Endpoint:** `GET /chat/conversations/{conversation_id}/messages`, `POST /chat/conversations/{conversation_id}/messages`
+
+**Preconditions:**
+- The user is authenticated.
+- The user has access to their automatically created coach thread.
+
+**Basic Flow:**
+1. User opens the AI Coach card in the Chat section.
+2. System resolves the virtual `conversation_id = "coach"` thread for the authenticated user.
+3. If the thread does not yet exist, the system creates a dedicated `type: "coach"` conversation and seeds it with a welcome message.
+4. User sends a message to the coach thread.
+5. System stores the user's message in `messages`.
+6. System generates a short motivational coach reply in the same coaching tone and stores it as a second message in the same conversation.
+7. System updates the conversation preview to the coach reply and returns success.
+
+**Alternative Flows:**
+
+- **AF-116-A: Coach thread not yet created** — On first access, the system creates the thread automatically with a welcome message from the AI coach.
+- **AF-116-B: Conversation not found** — Existing chat errors still apply if the conversation id is invalid or inaccessible.
+
+**Postconditions:**
+- Every authenticated user has a persistent coaching thread that can be reopened at any time.
+- The thread always speaks in a motivational, action-oriented tone focused on discipline, momentum, and practical next steps.
+
+**Business Rules:**
+- The AI coach is a system participant, not a separate user account.
+- The coach thread uses the existing `conversations` and `messages` collections; no new collection is introduced.
+- Responses must remain supportive, concise, and action-first rather than therapeutic or generic.
 
 ---
 
@@ -2314,8 +2347,8 @@ Anaida Space is a premium, psychologically intelligent self-development platform
 | `/rewards/activate` | POST | UC-103 |
 | `/chat/conversations` | GET | UC-110 |
 | `/chat/conversations` | POST | UC-111, UC-115 |
-| `/chat/conversations/{id}/messages` | POST | UC-112 |
-| `/chat/conversations/{id}/messages` | GET | UC-113 |
+| `/chat/conversations/{id}/messages` | POST | UC-112, UC-116 |
+| `/chat/conversations/{id}/messages` | GET | UC-113, UC-116 |
 | `/chat/search-users` | GET | UC-114 |
 | `/productivity/water/log` | POST | UC-120 |
 | `/productivity/water` | GET | UC-121 |
@@ -2349,8 +2382,8 @@ Anaida Space is a premium, psychologically intelligent self-development platform
 | `weekly_reviews` | UC-060, UC-061, UC-062 |
 | `user_rewards` | UC-101, UC-102, UC-103 |
 | `challenge_submissions` | UC-093, UC-094, UC-095, UC-098 |
-| `messages` | UC-112, UC-113 |
-| `conversations` | UC-110, UC-111, UC-115 |
+| `messages` | UC-112, UC-113, UC-116 |
+| `conversations` | UC-110, UC-111, UC-115, UC-116 |
 | `water_logs` | UC-120, UC-121, UC-122 |
 | `planner_tasks` | UC-123, UC-124, UC-125, UC-126 |
 | `sr_cards` | UC-127, UC-128, UC-129, UC-130 |

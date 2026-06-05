@@ -6,7 +6,7 @@
   <title>Dashboard — Anaida Space</title>
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700;800&family=Space+Mono:wght@400;700&display=swap" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700;800&family=Playfair+Display:ital,wght@0,700;1,400&family=Space+Mono:wght@400;700&display=swap" rel="stylesheet">
   <link rel="stylesheet" href="css/style.css">
   <style>
     /* ── Dashboard-specific design tokens ── */
@@ -41,13 +41,7 @@
       backdrop-filter: blur(16px);
       border-bottom: 1px solid rgba(255,255,255,.06);
     }
-    .dash-logo {
-      font-family: 'Outfit', sans-serif; font-size: .9rem;
-      font-weight: 700; letter-spacing: .04em;
-      background: linear-gradient(135deg,#c4b5fd,#8b5cf6);
-      -webkit-background-clip: text; -webkit-text-fill-color: transparent;
-      margin-right: 8px; white-space: nowrap;
-    }
+    .dash-logo { margin-right: 8px; flex-shrink: 0; }
     .dash-tabs { display: flex; gap: 4px; flex-wrap: wrap; }
     .dash-tab {
       background: rgba(255,255,255,.08); border: none; border-radius: 999px;
@@ -60,13 +54,110 @@
     .dash-user {
       margin-left: auto; font-size: .78rem; color: var(--muted);
       display: flex; align-items: center; gap: 8px;
+      cursor: pointer;
     }
+    .dash-user:hover #dashEmail { color: var(--white); }
     .dash-avatar {
       width: 30px; height: 30px; border-radius: 50%;
       background: var(--violet); display: flex; align-items: center;
       justify-content: center; font-size: .85rem; font-weight: 700;
-      cursor: pointer; flex-shrink: 0;
+      cursor: pointer; flex-shrink: 0; overflow: hidden;
+      border: 1px solid rgba(255,255,255,.15);
     }
+    .dash-avatar img {
+      width: 100%; height: 100%; object-fit: cover;
+    }
+
+    /* ── Profile side drawer ── */
+    .profile-drawer-backdrop {
+      position: fixed; inset: 0; z-index: 200;
+      background: rgba(0,0,0,.55);
+      backdrop-filter: blur(4px);
+      opacity: 0; visibility: hidden;
+      transition: opacity .3s, visibility .3s;
+    }
+    .profile-drawer-backdrop.open {
+      opacity: 1; visibility: visible;
+    }
+    .profile-drawer {
+      position: fixed; top: 0; right: 0; z-index: 210;
+      width: min(380px, 100vw);
+      height: 100vh;
+      padding: 24px 22px 32px;
+      overflow-y: auto;
+      background: rgba(12,12,28,.97);
+      border-left: 1px solid rgba(255,255,255,.08);
+      box-shadow: -12px 0 48px rgba(0,0,0,.45);
+      transform: translateX(100%);
+      transition: transform .32s cubic-bezier(.4,0,.2,1);
+    }
+    .profile-drawer.open { transform: translateX(0); }
+    .profile-drawer-head {
+      display: flex; align-items: center; justify-content: space-between;
+      margin-bottom: 22px;
+    }
+    .profile-drawer-title {
+      font-size: 1.05rem; font-weight: 700; color: var(--white);
+    }
+    .profile-drawer-close {
+      width: 36px; height: 36px; border-radius: 50%;
+      border: 1px solid rgba(255,255,255,.1);
+      background: rgba(255,255,255,.06); color: var(--white);
+      font-size: 1.25rem; line-height: 1; cursor: pointer;
+      display: flex; align-items: center; justify-content: center;
+    }
+    .profile-drawer-close:hover { background: rgba(139,92,246,.2); }
+    .profile-drawer-body {
+      display: flex; flex-direction: column; gap: 16px;
+    }
+    .profile-avatar-block { display: flex; flex-direction: column; align-items: center; gap: 10px; }
+    .profile-avatar {
+      width: 112px; height: 112px; border-radius: 50%;
+      background: linear-gradient(135deg, var(--violet), #a78bfa);
+      display: flex; align-items: center; justify-content: center;
+      font-size: 2.4rem; font-weight: 700; color: #fff;
+      overflow: hidden; border: 2px solid rgba(255,255,255,.12);
+      box-shadow: 0 12px 40px rgba(139,92,246,.35);
+    }
+    .profile-avatar img { width: 100%; height: 100%; object-fit: cover; }
+    .profile-photo-btn {
+      font-size: .72rem; color: var(--violet); background: none; border: none;
+      cursor: pointer; font-family: inherit; text-decoration: underline;
+      text-underline-offset: 3px;
+    }
+    .profile-photo-btn:hover { color: #c4b5fd; }
+    #profilePhotoInput { display: none; }
+    .profile-fields { display: flex; flex-direction: column; gap: 12px; min-width: 0; }
+    .profile-fields label {
+      font-size: .7rem; font-weight: 600; letter-spacing: .06em;
+      text-transform: uppercase; color: var(--muted);
+    }
+    .profile-input, .profile-textarea {
+      width: 100%; padding: 12px 14px; border-radius: var(--radius-btn);
+      border: 1px solid rgba(255,255,255,.1);
+      background: rgba(255,255,255,.05); color: var(--white);
+      font-family: 'Outfit', sans-serif; font-size: .92rem;
+      transition: border-color .2s, box-shadow .2s;
+    }
+    .profile-input:focus, .profile-textarea:focus {
+      outline: none; border-color: rgba(139,92,246,.5);
+      box-shadow: 0 0 0 3px rgba(139,92,246,.15);
+    }
+    .profile-textarea {
+      min-height: 88px; resize: vertical; line-height: 1.5;
+    }
+    .profile-actions {
+      display: flex; flex-wrap: wrap; align-items: center; gap: 12px; margin-top: 4px;
+    }
+    .profile-email-hint {
+      font-size: .78rem; color: var(--muted); margin-top: 2px;
+    }
+    .program-rec-item { margin-bottom: 14px; }
+    .program-rec-label {
+      font-size: .75rem; color: var(--muted); margin-bottom: 4px;
+      letter-spacing: .04em;
+    }
+    .program-rec-value { font-weight: 600; font-size: .92rem; line-height: 1.45; }
 
     /* ── Main layout ── */
     .dash-body { padding: 72px 24px 48px; max-width: 1100px; margin: 0 auto; }
@@ -294,14 +385,44 @@
       cursor: pointer; transition: all .2s;
     }
     .conv-item:hover { background: rgba(255,255,255,.08); }
+    .conv-item.coach {
+      border-color: rgba(16,185,129,.24);
+      background: linear-gradient(135deg, rgba(139,92,246,.10), rgba(16,185,129,.08));
+    }
     .conv-avatar {
       width: 38px; height: 38px; border-radius: 50%;
       background: var(--violet); display: flex; align-items: center;
       justify-content: center; font-weight: 700; font-size: .9rem; flex-shrink: 0;
     }
+    .conv-avatar.coach {
+      background: linear-gradient(135deg, var(--violet), var(--emerald));
+    }
     .conv-info { flex: 1; overflow: hidden; }
     .conv-name { font-size: .9rem; font-weight: 600; }
     .conv-last { font-size: .78rem; color: var(--muted); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+    .conv-meta { font-size: .7rem; color: #6ee7b7; margin-top: 3px; letter-spacing: .04em; text-transform: uppercase; }
+    .chat-coach-note {
+      display: flex; align-items: flex-start; justify-content: space-between; gap: 16px;
+      padding: 14px 16px; margin-bottom: 14px; border-radius: 14px;
+      background: linear-gradient(135deg, rgba(139,92,246,.12), rgba(16,185,129,.08));
+      border: 1px solid rgba(255,255,255,.08);
+    }
+    .chat-coach-eyebrow {
+      font-size: .7rem; font-weight: 700; letter-spacing: .08em;
+      color: #c4b5fd; text-transform: uppercase; margin-bottom: 6px;
+    }
+    .chat-coach-copy {
+      font-size: .84rem; color: var(--muted); line-height: 1.5; max-width: 44ch;
+    }
+    .chat-quick-prompts {
+      display: flex; flex-wrap: wrap; gap: 8px; justify-content: flex-end;
+    }
+    .chat-quick-prompt {
+      background: rgba(255,255,255,.06); border: 1px solid rgba(255,255,255,.08);
+      color: var(--white); border-radius: 999px; padding: 7px 12px;
+      font-size: .75rem; cursor: pointer; transition: all .2s;
+    }
+    .chat-quick-prompt:hover { border-color: var(--emerald); color: #dcfce7; }
     .msg-list { max-height: 340px; overflow-y: auto; display: flex; flex-direction: column; gap: 10px; padding: 4px 0 14px; }
     .msg { max-width: 72%; }
     .msg.mine { align-self: flex-end; }
@@ -311,6 +432,11 @@
     }
     .msg.mine .msg-bubble { background: var(--violet); border-bottom-right-radius: 4px; }
     .msg.theirs .msg-bubble { background: rgba(255,255,255,.08); border-bottom-left-radius: 4px; }
+    .msg.coach .msg-bubble {
+      background: linear-gradient(135deg, rgba(139,92,246,.24), rgba(16,185,129,.16));
+      border: 1px solid rgba(255,255,255,.06);
+      border-bottom-left-radius: 4px;
+    }
     .msg-time { font-size: .65rem; color: var(--muted); margin-top: 3px; text-align: right; }
 
     /* ── Status / feedback ── */
@@ -453,7 +579,7 @@
 
 <!-- ═══ TOP NAV ═══ -->
 <nav class="dash-nav" id="dashNav">
-  <span class="dash-logo">Anaida Space</span>
+  <a href="index.html" class="brand-wordmark brand-wordmark--nav dash-logo">Anaida Space</a>
   <div class="dash-tabs" id="dashTabs">
     <button class="dash-tab active" data-panel="overview">Overview</button>
     <button class="dash-tab" data-panel="features">Features</button>
@@ -463,11 +589,44 @@
     <button class="dash-tab" data-panel="rewards">Rewards</button>
     <button class="dash-tab" data-panel="chat">Chat</button>
   </div>
-  <div class="dash-user">
+  <div class="dash-user" id="dashUserTrigger" title="Your profile">
     <span id="dashEmail"></span>
-    <div class="dash-avatar" id="dashAvatar" title="Account"></div>
+    <div class="dash-avatar" id="dashAvatar" title="Your profile"></div>
   </div>
 </nav>
+
+<!-- ═══ PROFILE DRAWER (right) ═══ -->
+<div class="profile-drawer-backdrop" id="profileDrawerBackdrop" aria-hidden="true"></div>
+<aside class="profile-drawer" id="profileDrawer" aria-hidden="true" aria-labelledby="profileDrawerTitle">
+  <div class="profile-drawer-head">
+    <h2 class="profile-drawer-title" id="profileDrawerTitle">Your profile</h2>
+    <button type="button" class="profile-drawer-close" id="profileDrawerClose" aria-label="Close profile">×</button>
+  </div>
+  <div class="profile-drawer-body">
+    <div class="profile-avatar-block">
+      <div class="profile-avatar" id="profileAvatarDisplay" aria-hidden="true">?</div>
+      <input type="file" id="profilePhotoInput" accept="image/jpeg,image/png,image/webp" />
+      <button type="button" class="profile-photo-btn" id="profilePhotoBtn">Change photo</button>
+      <button type="button" class="profile-photo-btn" id="profilePhotoRemove" style="display:none">Remove photo</button>
+    </div>
+    <div class="profile-fields">
+      <div>
+        <label for="profileNameInput">Display name</label>
+        <input class="profile-input" id="profileNameInput" type="text" maxlength="200" placeholder="Your name" autocomplete="name" />
+      </div>
+      <div>
+        <label for="profileOverviewInput">Overview</label>
+        <textarea class="profile-textarea" id="profileOverviewInput" maxlength="2000" placeholder="A few words about your focus, goals, or who you are becoming…"></textarea>
+      </div>
+      <p class="profile-email-hint" id="profileEmailHint"></p>
+      <div class="profile-actions">
+        <button type="button" class="btn btn-sm" id="profileSaveBtn">Save profile</button>
+        <span class="status-msg" id="profileSaveStatus"></span>
+      </div>
+      <button type="button" class="btn btn-secondary btn-sm" id="profileSignOutBtn" style="width:100%;margin-top:8px">Sign out</button>
+    </div>
+  </div>
+</aside>
 
 <!-- ═══ MAIN BODY ═══ -->
 <main class="dash-body">
@@ -527,12 +686,6 @@
         <button class="btn btn-sm" onclick="switchPanel('protocol')">Choose Activity →</button>
       </div>
 
-      <!-- Today's protocol summary -->
-      <div class="card" id="protocolSummary">
-        <div class="card-title">Today's Recommendations</div>
-        <div id="protocolSummaryContent"><div class="empty">No protocol set for today. Go to Protocol tab to create one.</div></div>
-        <button class="btn btn-secondary btn-sm" style="margin-top:14px" onclick="switchPanel('protocol')">Open Protocol →</button>
-      </div>
     </div>
   </div>
 
@@ -837,6 +990,14 @@
       <p>Structured progress across three phases. Show up every day.</p>
     </div>
 
+    <div class="card" id="programRecommendations">
+      <div class="card-title">Today's Recommendations</div>
+      <div id="programRecommendationsContent">
+        <div class="empty">Complete the test to receive personalized recommendations.</div>
+      </div>
+      <button type="button" class="btn btn-secondary btn-sm" style="margin-top:14px" onclick="switchPanel('protocol')">Open Protocol →</button>
+    </div>
+
     <!-- No active program -->
     <div id="programStart">
       <div class="card">
@@ -1014,6 +1175,14 @@
           <input class="field" id="chatSearchInput" placeholder="Search users by email…" style="flex:1">
           <button class="btn btn-sm" id="chatSearchBtn">Search</button>
         </div>
+        <div class="conv-item coach" id="coachThreadCard" style="margin-bottom:12px">
+          <div class="conv-avatar coach">AI</div>
+          <div class="conv-info">
+            <div class="conv-name">AI Coach</div>
+            <div class="conv-last">Action-first coaching for discipline and momentum.</div>
+            <div class="conv-meta">Motivation coach</div>
+          </div>
+        </div>
         <div id="chatSearchResults" style="display:none;margin-bottom:12px;"></div>
         <div class="chat-conv-list" id="convList"><div class="empty">No conversations yet.</div></div>
       </div>
@@ -1024,6 +1193,19 @@
         <div style="display:flex;align-items:center;gap:10px;margin-bottom:14px">
           <button class="btn btn-secondary btn-sm" id="chatBackBtn">←</button>
           <div style="font-weight:600" id="chatThreadTitle">Conversation</div>
+        </div>
+        <div class="chat-coach-note" id="chatCoachNote" style="display:none">
+          <div>
+            <div class="chat-coach-eyebrow">AI Coach</div>
+            <div class="chat-coach-copy">
+              Short, direct, action-first coaching. Use it for structure, momentum, and honest resets.
+            </div>
+          </div>
+          <div class="chat-quick-prompts">
+            <button class="chat-quick-prompt" type="button" data-prompt="I feel stuck. Help me choose the next action.">Stuck</button>
+            <button class="chat-quick-prompt" type="button" data-prompt="I need a reset for today.">Reset</button>
+            <button class="chat-quick-prompt" type="button" data-prompt="Help me stay disciplined for the next hour.">Focus</button>
+          </div>
         </div>
         <div class="msg-list" id="msgList"></div>
         <div class="field-row" style="margin-top:10px">

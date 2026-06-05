@@ -3,6 +3,8 @@ from bson.errors import InvalidId
 
 from backend.repositories.database import get_collection
 
+AI_COACH_EMAIL = "coach@anaida.space"
+
 
 class ChatRepository:
     def __init__(self):
@@ -37,6 +39,17 @@ class ChatRepository:
             {
                 "type": "dm",
                 "participants": {"$all": [email_a, email_b], "$size": 2},
+            }
+        )
+        if doc:
+            doc["_id"] = str(doc["_id"])
+        return doc
+
+    def find_ai_conversation(self, email: str):
+        doc = self.conversations.find_one(
+            {
+                "type": "coach",
+                "participants": {"$all": [email, AI_COACH_EMAIL], "$size": 2},
             }
         )
         if doc:

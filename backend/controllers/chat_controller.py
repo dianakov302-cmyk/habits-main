@@ -34,7 +34,7 @@ def create_router(get_service: Callable[[], IChatService]) -> APIRouter:
         current_user: str = Depends(get_current_user),
         service: IChatService = Depends(get_service),
     ):
-        return service.get_messages(conversation_id)
+        return service.get_messages(conversation_id, current_user)
 
     @router.post("/conversations/{conversation_id}/messages")
     def send_message(

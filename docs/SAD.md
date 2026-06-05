@@ -541,7 +541,7 @@ No containerization is present in the current codebase.
 
 **conversations**
 ```
-{ _id: ObjectId, type: "dm"|"challenge", participants: [str] (emails), challenge_id: str (optional), last_message: str, last_message_at: ISO-8601 }
+{ _id: ObjectId, type: "dm"|"challenge"|"coach", participants: [str] (emails), challenge_id: str (optional), last_message: str, last_message_at: ISO-8601 }
 ```
 
 **messages**
@@ -593,6 +593,7 @@ users.email
   ├── sr_cards.email
   ├── brainstorm_sessions.email
   ├── conversations.participants[] (array contains email)
+  ├── conversations.type="coach" (one system-generated thread per user)
   └── messages.sender_email
 
 userHabits.userId  →  (userId is currently a string, not email — inconsistency)
@@ -610,6 +611,7 @@ The system uses raw pymongo dictionaries throughout. There are domain model clas
 - **Pro:** Flexible schema evolution — fields can be added without migrations.
 - **Con:** No automatic validation of data written to MongoDB; the repository layer trusts its callers.
 - **Con:** `_id` (ObjectId) must be manually converted to `str` before returning in responses; this is done inconsistently — some repositories do it, some do not.
+- **Con:** The chat layer now includes one system-generated coach thread per user; the application must keep that thread idempotent so users do not receive duplicate coach conversations.
 
 ---
 

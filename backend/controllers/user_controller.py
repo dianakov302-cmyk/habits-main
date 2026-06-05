@@ -92,6 +92,9 @@ def create_router(get_service: Callable[[], IUserService]) -> APIRouter:
             current_user,
             payload.new_email,
             payload.new_password,
+            payload.name,
+            payload.avatar_url,
+            payload.overview,
         )
 
     return router

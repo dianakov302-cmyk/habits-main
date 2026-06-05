@@ -1,9 +1,14 @@
 from datetime import datetime, timezone
 from typing import Any
 
-from backend.repositories.chat_repository import ChatRepository
+from backend.repositories.chat_repository import AI_COACH_EMAIL, ChatRepository
 from backend.repositories.user_repository import UserRepository
 from backend.business_logic.services.interfaces import IChatService
+
+AI_COACH_WELCOME = (
+    "I'm your coach here. Bring me the obstacle, the excuse, or the goal, and I'll "
+    "help you turn it into the next move."
+)
 
 
 class ChatService(IChatService):
@@ -13,7 +18,11 @@ class ChatService(IChatService):
 
     def get_conversations(self, email: str) -> dict[str, Any]:
         try:
-            convs = self.chat_repository.find_conversations_for_user(email)
+            convs = [
+                conv
+                for conv in self.chat_repository.find_conversations_for_user(email)
+                if conv.get("type") != "coach"
+            ]
             return {"status": "success", "data": convs}
         except Exception as e:
             return {"status": "error", "message": f"Failed to fetch conversations: {str(e)}"}
@@ -48,8 +57,14 @@ class ChatService(IChatService):
         except Exception as e:
             return {"status": "error", "message": f"Failed to start conversation: {str(e)}"}
 
-    def get_messages(self, conversation_id: str) -> dict[str, Any]:
+    def get_messages(self, conversation_id: str, sender_email: str | None = None) -> dict[str, Any]:
         try:
+            if conversation_id == "coach":
+                if not sender_email:
+                    return {"status": "error", "message": "Conversation not found."}
+                conv = self._ensure_coach_conversation(sender_email)
+                messages = self.chat_repository.find_messages(conv["_id"])
+                return {"status": "success", "data": messages}
             messages = self.chat_repository.find_messages(conversation_id)
             return {"status": "success", "data": messages}
         except Exception as e:
@@ -59,7 +74,11 @@ class ChatService(IChatService):
         self, conversation_id: str, sender_email: str, content: str
     ) -> dict[str, Any]:
         try:
-            conv = self.chat_repository.find_conversation_by_id(conversation_id)
+            if conversation_id == "coach":
+                conv = self._ensure_coach_conversation(sender_email)
+                conversation_id = conv["_id"]
+            else:
+                conv = self.chat_repository.find_conversation_by_id(conversation_id)
             if not conv:
                 return {"status": "error", "message": "Conversation not found."}
             if sender_email not in conv.get("participants", []):
@@ -74,9 +93,25 @@ class ChatService(IChatService):
                 "read_by": [sender_email],
             }
             msg_id = self.chat_repository.insert_message(msg_data)
-            self.chat_repository.update_conversation_last_message(
-                conversation_id, content, now
-            )
+            if conv.get("type") == "coach":
+                coach_reply = self._generate_coach_reply(content)
+                reply_at = datetime.now(timezone.utc).isoformat()
+                self.chat_repository.insert_message(
+                    {
+                        "conversation_id": conversation_id,
+                        "sender_email": AI_COACH_EMAIL,
+                        "content": coach_reply,
+                        "sent_at": reply_at,
+                        "read_by": [AI_COACH_EMAIL],
+                    }
+                )
+                self.chat_repository.update_conversation_last_message(
+                    conversation_id, coach_reply, reply_at
+                )
+            else:
+                self.chat_repository.update_conversation_last_message(
+                    conversation_id, content, now
+                )
             return {
                 "status": "success",
                 "data": {"_id": msg_id, **msg_data},
@@ -102,3 +137,66 @@ class ChatService(IChatService):
             return {"status": "success", "data": results}
         except Exception as e:
             return {"status": "error", "message": f"Search failed: {str(e)}"}
+
+    def _ensure_coach_conversation(self, email: str):
+        existing = self.chat_repository.find_ai_conversation(email)
+        if existing:
+            return existing
+
+        now = datetime.now(timezone.utc).isoformat()
+        data = {
+            "type": "coach",
+            "participants": [email, AI_COACH_EMAIL],
+            "last_message": AI_COACH_WELCOME,
+            "last_message_at": now,
+            "challenge_id": None,
+        }
+        conv_id = self.chat_repository.insert_conversation(data)
+        self.chat_repository.insert_message(
+            {
+                "conversation_id": conv_id,
+                "sender_email": AI_COACH_EMAIL,
+                "content": AI_COACH_WELCOME,
+                "sent_at": now,
+                "read_by": [AI_COACH_EMAIL, email],
+            }
+        )
+        return {"_id": conv_id, **data}
+
+    def _generate_coach_reply(self, content: str) -> str:
+        text = content.lower()
+
+        if any(word in text for word in ("tired", "drained", "burned out", "exhausted")):
+            return (
+                "Then shrink the task. Do the smallest useful version now, protect the streak, "
+                "and recover on purpose later."
+            )
+
+        if any(word in text for word in ("stuck", "procrast", "can't start", "cannot start", "lazy")):
+            return (
+                "You do not need more motivation. Pick one action you can finish in 10 minutes "
+                "and start before you negotiate with yourself."
+            )
+
+        if any(word in text for word in ("distract", "scroll", "phone", "noise", "messaging")):
+            return (
+                "Protect the next 25 minutes: put the phone away, close the extra tabs, and win "
+                "the first focused block."
+            )
+
+        if any(word in text for word in ("plan", "routine", "schedule", "habit")):
+            return (
+                "Good. Turn that into one concrete next action for today. Specific beats vague every "
+                "single time."
+            )
+
+        if content.strip().endswith("?"):
+            return (
+                "Answer it by choosing the next action, not by overthinking. If you want, send the "
+                "obstacle and I'll help you shrink it."
+            )
+
+        return (
+            "Keep moving. Consistency beats intensity. What is the one move that would make today "
+            "a win?"
+        )
