@@ -29,6 +29,7 @@
    - [Productivity — Planner (UC-123–UC-126)](#productivity--planner-uc-123uc-126)
    - [Productivity — Spaced Repetition (UC-127–UC-130)](#productivity--spaced-repetition-uc-127uc-130)
    - [Productivity — Brainstorm (UC-131–UC-132)](#productivity--brainstorm-uc-131uc-132)
+   - [Frontend Content Library (UC-133)](#frontend-content-library-uc-133)
 5. [Appendix A: Endpoint-to-Use-Case Mapping](#appendix-a-endpoint-to-use-case-mapping)
 6. [Appendix B: MongoDB Collection Reference](#appendix-b-mongodb-collection-reference)
 7. [Appendix C: Known Implementation Gaps](#appendix-c-known-implementation-gaps)
@@ -237,7 +238,7 @@ Anaida Space is a premium, psychologically intelligent self-development platform
 
 #### UC-003: Log Out
 
-**Actor(s):** Authenticated User  
+**Actor(s):** Authenticated User
 **Endpoint:** `POST /users/logout`
 
 **Preconditions:**
@@ -260,7 +261,7 @@ Anaida Space is a premium, psychologically intelligent self-development platform
 
 #### UC-004: View Profile
 
-**Actor(s):** Authenticated User  
+**Actor(s):** Authenticated User
 **Endpoint:** `GET /users/profile`
 
 **Preconditions:**
@@ -2286,8 +2287,41 @@ Anaida Space is a premium, psychologically intelligent self-development platform
 
 **Business Rules:**
 - There is no limit on the number of ideas per session.
-- Ideas cannot be individually deleted — only the entire session can be deleted (via `DELETE /productivity/brainstorm/{session_id}`).
+- Ideas cannot be individually deleted - only the entire session can be deleted (via `DELETE /productivity/brainstorm/{session_id}`).
 - Ideas are stored inline in the session document's `ideas` array, not as separate documents.
+
+---
+
+### Frontend Content Library (UC-133)
+
+#### UC-133: Browse Article Library
+
+**Actor(s):** Authenticated User
+**Endpoint:** Frontend dashboard tab (`dashboard.html?tab=article`)
+
+**Preconditions:**
+- User has loaded the dashboard.
+- The article tab is available in the dashboard navigation.
+
+**Basic Flow:**
+1. User opens the `Article` tab in the dashboard.
+2. System shows a library of four article cards: `Motivation`, `Discipline`, `Obsession`, and `Motivation vs Discipline vs Obsession`.
+3. User selects one article card.
+4. System replaces the library with the full article reader for the selected topic.
+5. If the selected article is `Motivation vs Discipline vs Obsession`, the reader includes the embedded video `ssstik.io_1780740783181.mp4`.
+6. User can return to the library and choose another article.
+
+**Alternative Flows:**
+
+- **AF-133-A: User returns to the library** - After opening a full article, user clicks `Back to article library`. System restores the four-card library view.
+
+**Postconditions:**
+- The user has either read a full article or returned to the library view.
+
+**Business Rules:**
+- Only one full article view is shown at a time.
+- The article library always contains exactly four cards.
+- The comparison article is the only one that embeds video.
 
 ---
 
@@ -2362,6 +2396,7 @@ Anaida Space is a premium, psychologically intelligent self-development platform
 | `/productivity/sr/review` | GET | UC-129 |
 | `/productivity/brainstorm` | POST | UC-131 |
 | `/productivity/brainstorm/{id}/ideas` | POST | UC-132 |
+| `dashboard.html?tab=article` | N/A | UC-133 |
 
 ---
 

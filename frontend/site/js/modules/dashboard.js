@@ -15,9 +15,6 @@ let rewardCatalogData = [];
 let userUnlocked = [];
 let userProfile = { name: '', overview: '', avatar_url: '' };
 let pendingAvatarUrl = null;
-let currentConvType = 'dm';
-const AI_COACH_EMAIL = 'coach@anaida.space';
-const AI_COACH_TITLE = 'AI Coach';
 
 // ── Auth verification ──
 async function verifyAuth() {
@@ -1082,32 +1079,12 @@ function renderConvList(convs) {
 
 window.openConversation = async function(id, title, type = 'dm') {
   currentConvId = id;
-  currentConvType = type || 'dm';
   set('chatThreadTitle', title);
-  const coachNote = document.getElementById('chatCoachNote');
-  const isCoach = currentConvType === 'coach';
-  if (coachNote) coachNote.style.display = isCoach ? 'flex' : 'none';
   showEl('chatThreadCard');
   hideEl('chatPlaceholderCard');
   await loadMessages(id);
-  if (isCoach) {
-    const promptButtons = document.querySelectorAll('.chat-quick-prompt');
-    promptButtons.forEach(btn => {
-      btn.onclick = () => {
-        const prompt = btn.dataset.prompt || '';
-        const input = document.getElementById('msgInput');
-        if (!prompt || !input) return;
-        input.value = prompt;
-        input.focus();
-      };
-    });
-  }
   document.getElementById('msgInput')?.focus();
 };
-
-document.getElementById('coachThreadCard')?.addEventListener('click', () => {
-  window.openConversation('coach', AI_COACH_TITLE, 'coach');
-});
 
 async function loadMessages(id) {
   try {
@@ -1122,8 +1099,7 @@ function renderMessages(msgs) {
   if (!msgs.length) { list.innerHTML = '<div class="empty" style="text-align:center;padding:20px">No messages yet.</div>'; return; }
   list.innerHTML = msgs.map(m => {
     const mine = m.sender_email === email;
-    const isCoach = m.sender_email === AI_COACH_EMAIL;
-    return `<div class="msg ${mine ? 'mine' : 'theirs'} ${isCoach ? 'coach' : ''}">
+    return `<div class="msg ${mine ? 'mine' : 'theirs'}">
       <div class="msg-bubble">${escHtml(m.content)}</div>
       <div class="msg-time">${formatMessageTime(m.sent_at || m.created_at || m.createdAt)}</div>
     </div>`;
@@ -1133,11 +1109,8 @@ function renderMessages(msgs) {
 
 document.getElementById('chatBackBtn')?.addEventListener('click', () => {
   currentConvId = null;
-  currentConvType = 'dm';
   hideEl('chatThreadCard');
   showEl('chatPlaceholderCard');
-  const coachNote = document.getElementById('chatCoachNote');
-  if (coachNote) coachNote.style.display = 'none';
 });
 
 document.getElementById('msgSendBtn')?.addEventListener('click', sendMessage);
